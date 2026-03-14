@@ -74,7 +74,8 @@ def clean_price_series(df, max_jump_pct=0.2):
     start = df.index.min()
     end = df.index.max()
 
-    full_index = pd.bdate_range(start=start, end=end)
+    # Use daily frequency to allow future date append including weekends
+    full_index = pd.date_range(start=start, end=end, freq="D")
     df = df.reindex(full_index)
 
     # Forward fill empty values; if first day is NaN, backfill then forward.
@@ -175,6 +176,12 @@ def download_prices(tickers, start="2000-01-01", end=None, data_dir="data", max_
             logging.error(f"Mixer error for {ticker}: {e}")
 
     return results
+
+
+def download_benchmark(benchmark="SPY", start="2000-01-01", end=None, data_dir="data", max_jump_pct=0.2):
+    """Download benchmark price data and store it as benchmark.csv."""
+    result = download_prices([benchmark], start=start, end=end, data_dir=data_dir, max_jump_pct=max_jump_pct)
+    return result
 
 
 def append_future_prices(ticker, future_price_map, data_dir="data"):

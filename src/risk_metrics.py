@@ -65,7 +65,9 @@ def calculate_sortino(returns, risk_free_rate=0.02, periods_per_year=252):
     rf_daily = (1 + risk_free_rate) ** (1 / periods_per_year) - 1
     excess = returns - rf_daily
     downside = returns[returns < rf_daily]
-    downside_std = downside.std() * np.sqrt(periods_per_year)
+    if len(downside) == 0:
+        return np.nan
+    downside_std = np.sqrt((downside ** 2).mean()) * np.sqrt(periods_per_year)
     ann_excess = excess.mean() * periods_per_year
     return ann_excess / downside_std if downside_std != 0 else np.nan
 
@@ -103,6 +105,29 @@ def calculate_risk_contribution(cov_matrix, weights):
     mrc = cov_matrix.dot(weights) / port_vol
     rc = (weights * mrc) / port_vol
     return pd.Series(rc, index=cov_matrix.index)
+
+
+def calculate_performance_attribution(asset_returns, weights, benchmark_returns=None):
+    asset_mean = asset_returns.mean()
+    if benchmark_returns is None:
+        benchmark_mean = asset_mean.mean()
+    else:
+        benchmark_mean = benchmark_returns.mean()
+
+    n = len(weights)
+    equal_w = 1.0 / n
+
+    selection = weights * (asset_mean - benchmark_mean)
+    allocation = (weights - equal_w) * benchmark_mean
+    interaction = weights * (asset_mean - benchmark_mean) - selection
+
+    attribution_df = pd.DataFrame({
+        "selection": selection,
+        "allocation": allocation,
+        "interaction": interaction,
+        "total": selection + allocation + interaction,
+    })
+    return attribution_df
 
 
 def calculate_effective_diversification(weights, cov_matrix):
@@ -145,6 +170,11 @@ def portfolio_report(price_df, weights=None, benchmark_returns=None, risk_free_r
     metrics["risk_contribution"] = calculate_risk_contribution(cov, weights)
     metrics["effective_diversification"] = calculate_effective_diversification(weights.values, cov)
     metrics["performance_contribution"] = calculate_performance_contribution(asset_returns, weights)
+    metrics["performance_attribution"] = calculate_performance_attribution(asset_returns, weights, benchmark_returns)
+
+    metrics["portfolio_return"] = calculate_cumulative_return(port_returns)
+    metrics["benchmark_return"] = benchmark_returns.mean() if benchmark_returns is not None else np.nan
+    metrics["active_return"] = metrics["portfolio_return"] - metrics["benchmark_return"] if benchmark_returns is not None else np.nan
 
     return metrics
 

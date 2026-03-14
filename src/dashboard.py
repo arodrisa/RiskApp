@@ -1,20 +1,8 @@
+import numpy as np
 import pandas as pd
-import streamlit as st
 
-from portfolio import load_price_dataframe, calculate_portfolio_returns, normalize_weights
-from risk_metrics import (
-    calculate_annualized_return,
-    calculate_annualized_volatility,
-    calculate_sharpe,
-    calculate_sortino,
-    calculate_var,
-    calculate_cvar,
-    calculate_drawdown_series,
-    calculate_tracking_error,
-    calculate_beta_alpha,
-    calculate_risk_contribution,
-    calculate_effective_diversification,
-)
+from src.portfolio import load_price_dataframe, calculate_portfolio_returns, normalize_weights
+from src import risk_metrics
 
 
 def merge_benchmark(benchmark_symbol, data_dir="data"):
@@ -26,6 +14,11 @@ def merge_benchmark(benchmark_symbol, data_dir="data"):
 
 
 def app():
+    try:
+        import streamlit as st
+    except Exception as e:
+        raise RuntimeError("Streamlit is required to run dashboard") from e
+
     st.set_page_config(page_title="RiskApp MVP Dashboard", layout="wide")
     st.title("RiskApp MVP Dashboard")
 
@@ -76,37 +69,28 @@ def app():
             except Exception:
                 st.warning("Benchmark not available or missing data")
 
-            st.subheader("Portfolio metrics")
-            st.write("Annualized return:", calculate_annualized_return(port_returns))
-            st.write("Annualized volatility:", calculate_annualized_volatility(port_returns))
-            st.write("Sharpe ratio:", calculate_sharpe(port_returns, risk_free_rate))
-            st.write("Sortino ratio:", calculate_sortino(port_returns, risk_free_rate))
-            st.write("VaR 95%:", calculate_var(port_returns, 0.05))
-            st.write("CVaR 95%:", calculate_cvar(port_returns, 0.05))
+            metrics = risk_metrics.portfolio_report(price_df, weights=weights, benchmark_returns=benchmark_returns, risk_free_rate=risk_free_rate)
 
+            st.subheader("Portfolio performance")
+            for key, value in metrics.items():
+                if key in ["correlation", "risk_contribution", "performance_contribution", "performance_attribution"]:
+                    st.subheader(key.replace("_", " ").title())
+                    st.dataframe(value)
+                elif key == "portfolio_return" or key == "benchmark_return" or key == "active_return":
+                    st.metric(key.replace("_", " ").title(), f"{value:.4%}" if pd.notnull(value) else "N/A")
+                elif isinstance(value, (float, np.floating, int, np.integer)):
+                    st.metric(key.replace("_", " ").title(), f"{value:.4f}")
+                else:
+                    st.write(f"{key}:", value)
+
+            # drawdown plot
             st.subheader("Drawdown")
-            drawdown = calculate_drawdown_series((1 + port_returns).cumprod())
+            drawdown = risk_metrics.calculate_drawdown_series((1 + asset_returns.dot(weights)).cumprod())
             st.line_chart(drawdown)
-            st.metric("Max drawdown", float(drawdown.min()))
-
-            if benchmark_returns is not None:
-                st.subheader("Benchmark comparison")
-                st.write("Tracking error:", calculate_tracking_error(port_returns, benchmark_returns))
-                beta, alpha = calculate_beta_alpha(port_returns, benchmark_returns, risk_free_rate)
-                st.write("Beta:", beta)
-                st.write("Alpha:", alpha)
-
-            st.subheader("Correlation matrix")
-            st.write(asset_returns.corr())
-
-            st.subheader("Risk contribution")
-            st.write(calculate_risk_contribution(asset_returns.cov(), weights))
-
-            st.subheader("Effective diversification")
-            st.write(calculate_effective_diversification(weights.values, asset_returns.cov()))
+            st.metric("Max drawdown", f"{drawdown.min():.2%}")
 
             st.subheader("Weights")
-            st.write(weights)
+            st.dataframe(weights)
 
             st.subheader("Historical prices")
             st.line_chart(price_df)

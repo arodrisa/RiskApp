@@ -4,9 +4,10 @@ import os
 
 import pandas as pd
 
-from data_ingest import baseline_ingest, download_prices, load_tickers, append_future_prices, read_config
-from portfolio import load_price_dataframe, calculate_portfolio_returns, normalize_weights, weights_from_csv
-from risk_metrics import (calculate_annualized_return, calculate_annualized_volatility, calculate_sharpe,
+from src.data_ingest import baseline_ingest, download_prices, download_benchmark, load_tickers, append_future_prices, read_config
+from src.portfolio import load_price_dataframe, calculate_portfolio_returns, normalize_weights, weights_from_csv
+from src import risk_metrics
+from src.risk_metrics import (calculate_annualized_return, calculate_annualized_volatility, calculate_sharpe,
                           calculate_sortino, calculate_var, calculate_cvar, calculate_drawdown_series,
                           calculate_tracking_error, calculate_beta_alpha, calculate_risk_contribution,
                           calculate_effective_diversification)
@@ -31,6 +32,14 @@ def main():
     metrics.add_argument("--benchmark", default="SPY")
     metrics.add_argument("--data-dir", default="data")
     metrics.add_argument("--risk-free", type=float, default=0.02)
+
+    report = sub.add_parser("report", help="Compute metrics and save reports")
+    report.add_argument("--tickers", nargs="*", help="Tickers to include")
+    report.add_argument("--weights", help="JSON weights string or CSV path")
+    report.add_argument("--benchmark", default="SPY")
+    report.add_argument("--data-dir", default="data")
+    report.add_argument("--risk-free", type=float, default=0.02)
+    report.add_argument("--output-dir", default="reports")
 
     dashboard = sub.add_parser("dashboard", help="Run Streamlit dashboard")
 
@@ -57,9 +66,12 @@ def main():
                 weights = pd.Series(json.loads(args.weights))
 
         port_returns, asset_returns, w = calculate_portfolio_returns(price_df, weights=weights)
-        benchmark = None
         benchmark_returns = None
         bm_path = os.path.join(args.data_dir, f"{args.benchmark}.csv")
+        if not os.path.exists(bm_path):
+            print(f"Benchmark {args.benchmark} not found locally. Downloading...")
+            download_benchmark(args.benchmark, start=read_config().get("start_date", "2000-01-01"), end=read_config().get("end_date"), data_dir=args.data_dir, max_jump_pct=read_config().get("anomaly_threshold_pct", 0.2))
+
         if os.path.exists(bm_path):
             bm_df = pd.read_csv(bm_path, parse_dates=["Date"], index_col="Date")
             bm_series = bm_df["Adj Close"].fillna(method="ffill").dropna()
@@ -82,6 +94,44 @@ def main():
         cov = asset_returns.cov()
         print("Risk contribution:", calculate_risk_contribution(cov, w))
         print("Effective diversification:", calculate_effective_diversification(w.values, cov))
+
+    elif args.command == "report":
+        cfg = read_config()
+        tickers = args.tickers or load_tickers("yahoo_tickers.txt")
+        price_df = load_price_dataframe(tickers, data_dir=args.data_dir)
+        weights = None
+        if args.weights:
+            if os.path.exists(args.weights):
+                weights = weights_from_csv(args.weights)
+            else:
+                weights = pd.Series(json.loads(args.weights))
+
+        weights = normalize_weights(weights, tickers)
+        benchmark_returns = None
+        bm_path = os.path.join(args.data_dir, f"{args.benchmark}.csv")
+        if not os.path.exists(bm_path):
+            print(f"Benchmark {args.benchmark} not found locally. Downloading...")
+            download_benchmark(args.benchmark, start=cfg.get("start_date"), end=cfg.get("end_date"), data_dir=args.data_dir, max_jump_pct=cfg.get("anomaly_threshold_pct",0.2))
+
+        if os.path.exists(bm_path):
+            bm_df = pd.read_csv(bm_path, parse_dates=["Date"], index_col="Date")
+            bm_series = bm_df["Adj Close"].fillna(method="ffill").dropna()
+            benchmark_returns = bm_series.pct_change().dropna()
+
+        metrics = risk_metrics.portfolio_report(price_df, weights=weights, benchmark_returns=benchmark_returns, risk_free_rate=args.risk_free)
+
+        os.makedirs(args.output_dir, exist_ok=True)
+
+        # scalar metrics
+        scalar_items = {k: float(v) for k, v in metrics.items() if not isinstance(v, (pd.DataFrame, pd.Series)) and not pd.isna(v)}
+        pd.DataFrame(list(scalar_items.items()), columns=["metric", "value"]).to_csv(os.path.join(args.output_dir, "metrics.csv"), index=False)
+
+        # object metrics
+        for key in ["correlation", "risk_contribution", "performance_contribution", "performance_attribution"]:
+            if key in metrics:
+                metrics[key].to_csv(os.path.join(args.output_dir, f"{key}.csv"))
+
+        print(f"Report saved to {args.output_dir}")
 
     elif args.command == "dashboard":
         os.system("streamlit run src/dashboard.py")

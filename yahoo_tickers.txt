@@ -1,0 +1,28 @@
+Symbol,Name
+EI.PA,Essilor International Société Anonyme
+ALV.DE,Allianz SE
+DTE.DE,Deutsche Telekom AG
+BN.PA,Danone S.A.
+IBE.MC,"Iberdrola, S.A."
+AI.PA,L'Air Liquide S.A.
+ENI.MI,Eni S.p.A.
+BAS.DE,BASF SE
+FRE.DE,Fresenius SE & Co. KGaA
+G.MI,Assicurazioni Generali S.p.A.
+BAYN.DE,Bayer Aktiengesellschaft
+ASML.AS,ASML Holding N.V.
+DG.PA,Vinci SA
+AIR.PA,Airbus SE
+ENGI.PA,Engie SA
+CA.PA,Carrefour SA
+CS.PA,AXA SA
+ABI.BR,Anheuser-Busch InBev SA/NV
+EOAN.DE,E.ON SE
+BMW.DE,Bayerische Motoren Werke Aktiengesellschaft
+BNP.PA,BNP Paribas SA
+ISP.MI,Intesa Sanpaolo S.p.A.
+INGA.AS,ING Groep N.V.
+ENEL.MI,Enel SpA
+BBVA.MC,"Banco Bilbao Vizcaya Argentaria, S.A."
+DBK.DE,Deutsche Bank Aktiengesellschaft
+GLE.PA,Société Générale Société anonyme

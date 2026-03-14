@@ -1,0 +1,8 @@
+# RiskApp MVP configuration
+start_date: '2000-01-01'
+end_date: null  # null means today
+data_dir: 'data'
+anomaly_threshold_pct: 0.2  # 20% daily return jump by default
+risk_free_rate: 0.02
+default_weights: []  # empty list means equal weight in portfolio module
+debug: false

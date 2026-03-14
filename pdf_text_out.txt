@@ -1,0 +1,94 @@
+PAGE 1
+Business Plan T ecnico { MVP\RiskApp"
+Democratizaci on de herramientas de an alisis de riesgo y performance
+para inversores particulares
+1 Resumen del proyecto
+RiskApp es una aplicaci on web que permite a los inversores particulares analizar el
+riesgo de mercado y la performance de sus carteras de inversi on utilizando m etricas y
+metodolog as empleadas en la banca de inversi on institucional.
+El objetivo principal es democratizar el acceso a herramientas avanzadas de gesti on
+de riesgo, ofreciendo un servicio accesible, visual e intuitivo.
+2 Objetivo del MVP
+El MVP busca validar el inter es de los usuarios en analizar sus carteras con m etricas de
+riesgo y rendimiento avanzadas. Permitir a:
+Cargar una cartera (tickers + pesos o CSV).
+Calcular m etricas clave de riesgo y rentabilidad.
+Visualizar resultados en un dashboard web.
+Obtener feedback del usuario.
+3 Roadmap del MVP
+Denici on y dise~ no
+Denir funcionalidades principales.
+Dise~ nar ujo de usuario y estructura modular.
+Elegir APIs de datos (p.ej. Yahoo Finance).
+Carga de cartera y adquisici on de datos
+Crear formulario para introducir tickers y pesos.
+Conectar con API de datos nancieros (ynance).
+Guardar precios hist oricos en cheros locales (CSV).
+1
+------------------------------------------------------------
+PAGE 2
+C alculo de m etricas de riesgo y performance
+Implementar c alculo de rentabilidad y riesgo.
+Incluir m etricas avanzadas: VaR, CVaR, Sharpe, Drawdown, etc.
+A~ nadir Performance Contribution y Attribution simplicada.
+Visualizaci on interactiva
+Desarrollar dashboard con gr acos (Streamlit o Flask).
+Mostrar correlaciones, evoluci on hist orica y aportes al riesgo.
+A~ nadir feedback del usuario.
+Pruebas y validaci on
+Test con usuarios reales.
+Recoger feedback cualitativo.
+Ajustar UX y claridad de m etricas.
+Renamiento y estrategia futura
+Denir modelo de precios (freemium + premium).
+Preparar integraci on con APIs de brokers.
+Dise~ nar versi on m ovil (fase 2).
+2
+------------------------------------------------------------
+PAGE 3
+4 Lista completa de m etricas
+1. M etricas de Rentabilidad (Performance)
+M etrica Tipo Descripci on
+Rentabilidad acumulada Performance Rendimiento total de la cartera
+Rentabilidad anualizada Performance Media anual de rentabilidad
+Performance Contribution Performance Aporte de cada activo al rendimiento
+total
+Performance Attribution Performance Separaci on entre selecci on y asig-
+naci on
+Tracking Error Performance Volatilidad del exceso de rentabili-
+dad vs benchmark
+Alpha Performance Rentabilidad ajustada frente al
+benchmark
+Beta Performance Sensibilidad al benchmark
+Volatilidad anualizada Risk Desviaci on est andar de los retornos
+VaR 95% Risk P erdida m axima esperada al 95% de
+conanza
+CVaR 95% (Expected Shortfall) Risk P erdida promedio esperada en el
+peor 5%
+Drawdown m aximo Risk M axima ca da desde un pico
+Aporte al riesgo Risk Contribuci on de cada activo al riesgo
+total
+Correlaci on entre activos Risk Medida de co-movimiento
+Diversicaci on efectiva Risk Nivel de diversicaci on global
+Ratio de Sharpe Risk Adj Rentabilidad ajustada por volatili-
+dad
+Ratio de Sortino Risk Adj Variante que penaliza solo volatili-
+dad negativa
+Comparativa cartera vs benchmark Benchmark Gr aco de rentabilidad acumulada
+relativa
+Exceso de rendimiento Benchmark Diferencia de rentabilidad frente al
+ ndice de referencia
+5 Arquitectura t ecnica
+Backend: Python + FastAPI para servir precios y m etricas v a API.
+Datos: Yahoo Finance / ynance.
+Persistencia: CSV o SQLite (fase inicial).
+Frontend: Streamlit para dashboard interactivo.
+3
+------------------------------------------------------------
+PAGE 4
+6 Pr oximos pasos
+Implementar endpoints para c alculo de m etricas.
+Crear visualizaciones comparativas.
+Lanzar pruebas de usuario para validar el MVP.
+4
+------------------------------------------------------------

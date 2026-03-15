@@ -133,17 +133,29 @@ def calculate_performance_attribution(asset_returns, weights, benchmark_returns=
     n = len(weights)
     equal_w = 1.0 / n
 
-    selection = weights * (asset_mean - benchmark_mean)
     allocation = (weights - equal_w) * benchmark_mean
-    interaction = weights * (asset_mean - benchmark_mean) - selection
+    selection = weights * (asset_mean - benchmark_mean)
+    interaction = (weights - equal_w) * (asset_mean - benchmark_mean)
+    total = allocation + selection + interaction
 
     attribution_df = pd.DataFrame({
-        "selection": selection,
         "allocation": allocation,
+        "selection": selection,
         "interaction": interaction,
-        "total": selection + allocation + interaction,
+        "total": total,
     })
+
     return attribution_df
+
+
+def calculate_performance_attribution_summary(asset_returns, weights, benchmark_returns=None):
+    attribution_df = calculate_performance_attribution(asset_returns, weights, benchmark_returns)
+    return {
+        "allocation": float(attribution_df["allocation"].sum()),
+        "selection": float(attribution_df["selection"].sum()),
+        "interaction": float(attribution_df["interaction"].sum()),
+        "total": float(attribution_df["total"].sum()),
+    }
 
 
 def calculate_effective_diversification(weights, cov_matrix):
@@ -201,6 +213,7 @@ def portfolio_report(price_df, weights=None, benchmark_returns=None, risk_free_r
     metrics["effective_diversification"] = calculate_effective_diversification(weights, cov)
     metrics["performance_contribution"] = calculate_performance_contribution(asset_returns, weights)
     metrics["performance_attribution"] = calculate_performance_attribution(asset_returns, weights, benchmark_returns)
+    metrics["performance_attribution_summary"] = calculate_performance_attribution_summary(asset_returns, weights, benchmark_returns)
 
     metrics["weights"] = weights
     metrics["portfolio_return"] = calculate_cumulative_return(port_returns)

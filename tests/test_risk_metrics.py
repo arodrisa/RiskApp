@@ -71,3 +71,14 @@ def test_performance_attribution():
     assert "allocation" in attribution.columns
     assert "total" in attribution.columns
     assert np.isclose(attribution["total"].sum(), attribution["selection"].sum() + attribution["allocation"].sum() + attribution["interaction"].sum())
+
+
+def test_performance_attribution_summary():
+    asset_returns = pd.DataFrame({"A": [0.01, 0.02, -0.005], "B": [0.005, 0.015, 0.01]})
+    weights = pd.Series([0.6, 0.4], index=["A", "B"])
+    benchmark = pd.Series([0.008, 0.018, 0.002])
+    summary = risk_metrics.calculate_performance_attribution_summary(asset_returns, weights, benchmark_returns=benchmark)
+
+    assert isinstance(summary, dict)
+    assert set(summary.keys()) == {"allocation", "selection", "interaction", "total"}
+    assert np.isclose(summary["total"], summary["allocation"] + summary["selection"] + summary["interaction"])

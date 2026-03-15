@@ -137,11 +137,15 @@ def main():
         os.makedirs(args.output_dir, exist_ok=True)
 
         # scalar metrics
-        scalar_items = {k: float(v) for k, v in metrics.items() if not isinstance(v, (pd.DataFrame, pd.Series)) and not pd.isna(v)}
+        scalar_items = {
+            k: float(v)
+            for k, v in metrics.items()
+            if not isinstance(v, (pd.DataFrame, pd.Series, dict, list)) and not pd.isna(v)
+        }
         pd.DataFrame(list(scalar_items.items()), columns=["metric", "value"]).to_csv(os.path.join(args.output_dir, "metrics.csv"), index=False)
 
         # object metrics
-        object_keys = ["weights", "correlation", "risk_contribution", "performance_contribution", "performance_attribution"]
+        object_keys = ["weights", "correlation", "risk_contribution", "performance_contribution", "performance_attribution", "performance_attribution_summary"]
         for key in object_keys:
             if key in metrics:
                 result = metrics[key]

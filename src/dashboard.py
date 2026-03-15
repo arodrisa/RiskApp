@@ -67,10 +67,12 @@ def app():
             price_df = load_price_dataframe(selected_tickers, data_dir=data_dir)
             port_returns, asset_returns, weights = calculate_portfolio_returns(price_df, weights=weights)
 
+            # Keep weights aligned to actually loaded tickers (after load_price_dataframe may drop unavailable symbols)
+            loaded_tickers = list(price_df.columns)
             if weights is None or weights.sum() == 0:
-                weights = normalize_weights(None, selected_tickers)
+                weights = normalize_weights(None, loaded_tickers)
             else:
-                weights = normalize_weights(weights, selected_tickers)
+                weights = normalize_weights(weights, loaded_tickers)
 
             benchmark = None
             benchmark_returns = None
@@ -82,17 +84,28 @@ def app():
 
             metrics = risk_metrics.portfolio_report(price_df, weights=weights, benchmark_returns=benchmark_returns, risk_free_rate=risk_free_rate)
 
-            st.subheader("Portfolio performance")
-            for key, value in metrics.items():
-                if key in ["correlation", "risk_contribution", "performance_contribution", "performance_attribution"]:
+            st.subheader("Portfolio performance metrics")
+            scalar_metrics = {
+                k: float(v)
+                for k, v in metrics.items()
+                if isinstance(v, (int, float, np.integer, np.floating)) and pd.notnull(v)
+            }
+            if scalar_metrics:
+                st.dataframe(
+                    pd.DataFrame.from_dict(scalar_metrics, orient="index", columns=["value"]).reset_index().rename(columns={"index": "metric"})
+                )
+
+            if "weights" in metrics and isinstance(metrics["weights"], (pd.Series, pd.DataFrame)):
+                st.subheader("Weights")
+                w = metrics["weights"]
+                if isinstance(w, pd.Series):
+                    w = w.rename("weight").reset_index().rename(columns={"index": "ticker"})
+                st.dataframe(w)
+
+            for key in ["correlation", "risk_contribution", "performance_contribution", "performance_attribution"]:
+                if key in metrics:
                     st.subheader(key.replace("_", " ").title())
-                    st.dataframe(value)
-                elif key == "portfolio_return" or key == "benchmark_return" or key == "active_return":
-                    st.metric(key.replace("_", " ").title(), f"{value:.4%}" if pd.notnull(value) else "N/A")
-                elif isinstance(value, (float, np.floating, int, np.integer)):
-                    st.metric(key.replace("_", " ").title(), f"{value:.4f}")
-                else:
-                    st.write(f"{key}:", value)
+                    st.dataframe(metrics[key])
 
             # drawdown plot
             st.subheader("Drawdown")

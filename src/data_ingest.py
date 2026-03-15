@@ -144,6 +144,15 @@ def download_prices(tickers, start="2000-01-01", end=None, data_dir="data", max_
     if len(tickers) == 1:
         ticker = tickers[0]
         df_out = prices.copy()
+
+        # yfinance may return multiindex columns when tickers is a list, even with one symbol
+        if isinstance(df_out.columns, pd.MultiIndex):
+            if ticker in df_out.columns.get_level_values(0):
+                df_out = df_out[ticker]
+            else:
+                # try to simplify if levels like ('Ticker', 'SPY') etc
+                df_out = df_out.droplevel(0, axis=1)
+
         if df_out.empty:
             logging.warning(f"No data downloaded for {ticker}")
             return results

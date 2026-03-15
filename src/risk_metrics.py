@@ -11,6 +11,8 @@ def calculate_annualized_return(returns, periods_per_year=252):
     if isinstance(returns, pd.Series):
         cum = calculate_cumulative_return(returns)
         n = len(returns)
+        if n == 0:
+            return np.nan
         return (1 + cum) ** (periods_per_year / n) - 1
     else:
         return returns.apply(lambda x: calculate_annualized_return(x, periods_per_year))
@@ -100,10 +102,24 @@ def calculate_performance_contribution(asset_returns, weights):
 
 
 def calculate_risk_contribution(cov_matrix, weights):
-    weights = np.asarray(weights)
-    port_vol = np.sqrt(weights.dot(cov_matrix).dot(weights))
-    mrc = cov_matrix.dot(weights) / port_vol
-    rc = (weights * mrc) / port_vol
+    cov_matrix = pd.DataFrame(cov_matrix)
+
+    if isinstance(weights, (pd.Series, pd.DataFrame)):
+        weights = pd.Series(weights).reindex(cov_matrix.index).fillna(0.0)
+    else:
+        weights = pd.Series(np.asarray(weights), index=cov_matrix.index)
+
+    if len(weights) != len(cov_matrix.index):
+        raise ValueError("Weights length must match covariance matrix dimension")
+
+    w = weights.values.astype(float)
+    cov_vals = cov_matrix.values
+    port_vol = np.sqrt(w.dot(cov_vals).dot(w))
+    if port_vol == 0 or np.isnan(port_vol):
+        return pd.Series(np.nan, index=cov_matrix.index)
+
+    mrc = cov_vals.dot(w) / port_vol
+    rc = (w * mrc) / port_vol
     return pd.Series(rc, index=cov_matrix.index)
 
 
@@ -131,17 +147,31 @@ def calculate_performance_attribution(asset_returns, weights, benchmark_returns=
 
 
 def calculate_effective_diversification(weights, cov_matrix):
-    port_vol = np.sqrt(weights.dot(cov_matrix).dot(weights))
-    if port_vol == 0:
+    cov_matrix = pd.DataFrame(cov_matrix)
+
+    if isinstance(weights, (pd.Series, pd.DataFrame)):
+        w = pd.Series(weights).reindex(cov_matrix.index).fillna(0.0).values.astype(float)
+    else:
+        w = np.asarray(weights, dtype=float)
+
+    if len(w) != len(cov_matrix.index):
+        raise ValueError("Weights length must match covariance matrix dimension")
+
+    port_vol = np.sqrt(w.dot(cov_matrix.values).dot(w))
+    if port_vol == 0 or np.isnan(port_vol):
         return np.nan
-    mrc = cov_matrix.dot(weights) / port_vol
-    dc = (weights * mrc) / port_vol
+    mrc = cov_matrix.values.dot(w) / port_vol
+    dc = (w * mrc) / port_vol
     return 1.0 / np.sum(np.square(dc))
 
 
 def portfolio_report(price_df, weights=None, benchmark_returns=None, risk_free_rate=0.02):
     asset_returns = price_df.pct_change().dropna()
     weights = weights if weights is not None else pd.Series(np.repeat(1 / len(price_df.columns), len(price_df.columns)), index=price_df.columns)
+
+    weights = weights.reindex(price_df.columns).fillna(0.0)
+    if weights.sum() == 0:
+        raise ValueError("Weights sum to zero after alignment with price columns")
     weights = weights / weights.sum()
 
     port_returns = asset_returns.dot(weights)
@@ -168,10 +198,11 @@ def portfolio_report(price_df, weights=None, benchmark_returns=None, risk_free_r
     metrics["correlation"] = asset_returns.corr()
     cov = asset_returns.cov()
     metrics["risk_contribution"] = calculate_risk_contribution(cov, weights)
-    metrics["effective_diversification"] = calculate_effective_diversification(weights.values, cov)
+    metrics["effective_diversification"] = calculate_effective_diversification(weights, cov)
     metrics["performance_contribution"] = calculate_performance_contribution(asset_returns, weights)
     metrics["performance_attribution"] = calculate_performance_attribution(asset_returns, weights, benchmark_returns)
 
+    metrics["weights"] = weights
     metrics["portfolio_return"] = calculate_cumulative_return(port_returns)
     metrics["benchmark_return"] = benchmark_returns.mean() if benchmark_returns is not None else np.nan
     metrics["active_return"] = metrics["portfolio_return"] - metrics["benchmark_return"] if benchmark_returns is not None else np.nan

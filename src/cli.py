@@ -1,16 +1,30 @@
 import argparse
 import json
 import os
+import sys
+
+# Ensure local package path for relative imports in scripts
+if os.path.dirname(os.path.abspath(__file__)) not in sys.path:
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import pandas as pd
 
-from src.data_ingest import baseline_ingest, download_prices, download_benchmark, load_tickers, append_future_prices, read_config
-from src.portfolio import load_price_dataframe, calculate_portfolio_returns, normalize_weights, weights_from_csv
-from src import risk_metrics
-from src.risk_metrics import (calculate_annualized_return, calculate_annualized_volatility, calculate_sharpe,
-                          calculate_sortino, calculate_var, calculate_cvar, calculate_drawdown_series,
-                          calculate_tracking_error, calculate_beta_alpha, calculate_risk_contribution,
-                          calculate_effective_diversification)
+try:
+    from src.data_ingest import baseline_ingest, download_prices, download_benchmark, load_tickers, append_future_prices, read_config
+    from src.portfolio import load_price_dataframe, calculate_portfolio_returns, normalize_weights, weights_from_csv
+    from src import risk_metrics
+    from src.risk_metrics import (calculate_annualized_return, calculate_annualized_volatility, calculate_sharpe,
+                              calculate_sortino, calculate_var, calculate_cvar, calculate_drawdown_series,
+                              calculate_tracking_error, calculate_beta_alpha, calculate_risk_contribution,
+                              calculate_effective_diversification)
+except ImportError:
+    from data_ingest import baseline_ingest, download_prices, download_benchmark, load_tickers, append_future_prices, read_config
+    from portfolio import load_price_dataframe, calculate_portfolio_returns, normalize_weights, weights_from_csv
+    import risk_metrics
+    from risk_metrics import (calculate_annualized_return, calculate_annualized_volatility, calculate_sharpe,
+                              calculate_sortino, calculate_var, calculate_cvar, calculate_drawdown_series,
+                              calculate_tracking_error, calculate_beta_alpha, calculate_risk_contribution,
+                              calculate_effective_diversification)
 
 
 def main():
@@ -127,9 +141,16 @@ def main():
         pd.DataFrame(list(scalar_items.items()), columns=["metric", "value"]).to_csv(os.path.join(args.output_dir, "metrics.csv"), index=False)
 
         # object metrics
-        for key in ["correlation", "risk_contribution", "performance_contribution", "performance_attribution"]:
+        object_keys = ["weights", "correlation", "risk_contribution", "performance_contribution", "performance_attribution"]
+        for key in object_keys:
             if key in metrics:
-                metrics[key].to_csv(os.path.join(args.output_dir, f"{key}.csv"))
+                result = metrics[key]
+                if isinstance(result, (pd.Series, pd.DataFrame)):
+                    result.to_csv(os.path.join(args.output_dir, f"{key}.csv"))
+
+        # portfolio metrics table (all scalar values)
+        portfolio_metrics_df = pd.DataFrame([scalar_items])
+        portfolio_metrics_df.to_csv(os.path.join(args.output_dir, "portfolio_metrics.csv"), index=False)
 
         print(f"Report saved to {args.output_dir}")
 

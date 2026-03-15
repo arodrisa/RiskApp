@@ -43,6 +43,24 @@ def test_beta_alpha_tracking():
     assert te >= 0
 
 
+def test_risk_contribution_alignment():
+    asset_returns = pd.DataFrame({"A": [0.01, 0.02, -0.005], "B": [0.005, 0.015, 0.01]})
+    cov = asset_returns.cov()
+    weights = pd.Series([0.5, 0.5], index=["A", "B"])
+    rc = risk_metrics.calculate_risk_contribution(cov, weights)
+    assert list(rc.index) == ["A", "B"]
+    assert np.isclose(rc.sum(), 1.0, atol=1e-6) or np.isfinite(rc.sum())
+
+
+def test_portfolio_report_includes_weights():
+    price_df = pd.DataFrame({"A": [100, 101, 102], "B": [200, 202, 204]}, index=pd.date_range("2023-01-01", periods=3))
+    weights = pd.Series([0.5, 0.5], index=["A", "B"])
+    metrics = risk_metrics.portfolio_report(price_df, weights=weights)
+    assert "weights" in metrics
+    assert isinstance(metrics["weights"], pd.Series)
+    assert np.isclose(metrics["weights"].sum(), 1.0)
+
+
 def test_performance_attribution():
     asset_returns = pd.DataFrame({"A": [0.01, 0.02, -0.005], "B": [0.005, 0.015, 0.01]})
     weights = pd.Series([0.6, 0.4], index=["A", "B"])

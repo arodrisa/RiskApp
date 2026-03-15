@@ -1,8 +1,19 @@
+import os
+import sys
+
+# Ensure local package path for relative imports in scripts
+if os.path.dirname(os.path.abspath(__file__)) not in sys.path:
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import numpy as np
 import pandas as pd
 
-from src.portfolio import load_price_dataframe, calculate_portfolio_returns, normalize_weights
-from src import risk_metrics
+try:
+    from src.portfolio import load_price_dataframe, calculate_portfolio_returns, normalize_weights
+    from src import risk_metrics
+except ImportError:
+    from portfolio import load_price_dataframe, calculate_portfolio_returns, normalize_weights
+    import risk_metrics
 
 
 def merge_benchmark(benchmark_symbol, data_dir="data"):

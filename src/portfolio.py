@@ -39,6 +39,8 @@ def load_price_dataframe(tickers, data_dir="data"):
 
     all_prices = pd.concat(dfs, axis=1).sort_index()
     all_prices = all_prices.dropna(how="all")
+    # Drop tickers with no valid price data to avoid empty return series
+    all_prices = all_prices.loc[:, all_prices.notna().any(axis=0)]
     return all_prices
 
 
@@ -55,6 +57,12 @@ def calculate_returns(price_df, kind="daily"):
 def calculate_portfolio_returns(price_df, weights=None, use_log=False):
     tickers = list(price_df.columns)
     weights = normalize_weights(weights, tickers)
+
+    # align weights with actual price columns and set missing to 0
+    weights = weights.reindex(tickers).fillna(0.0)
+    if weights.sum() == 0:
+        raise ValueError("All weights are zero after filtering available price columns")
+
     asset_returns = calculate_returns(price_df, kind="log" if use_log else "daily")
     port_returns = asset_returns.dot(weights)
     return port_returns, asset_returns, weights

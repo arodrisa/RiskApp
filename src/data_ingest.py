@@ -79,7 +79,7 @@ def clean_price_series(df, max_jump_pct=0.2):
     df = df.reindex(full_index)
 
     # Forward fill empty values; if first day is NaN, backfill then forward.
-    df = df.fillna(method="ffill").fillna(method="bfill")
+    df = df.ffill().bfill()
 
     if "Adj Close" in df.columns:
         df = df[df["Adj Close"] > 0]

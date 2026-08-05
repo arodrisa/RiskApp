@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-patr}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_DB: ${POSTGRES_DB:-patrimony}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-patr} -d ${POSTGRES_DB:-patrimony}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    ports:
+      - "8001:8000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-patr}:${POSTGRES_PASSWORD:-change-me}@db:5432/${POSTGRES_DB:-patrimony}
+      APP_ENV: ${APP_ENV:-production}
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+      APP_AUTH_ENABLED: ${APP_AUTH_ENABLED:-true}
+      APP_BOOTSTRAP_TOKEN: ${APP_BOOTSTRAP_TOKEN:-}
+      APP_PUBLIC_URL: ${APP_PUBLIC_URL:-}
+      APP_COOKIE_SECURE: ${APP_COOKIE_SECURE:-true}
+      APP_COOKIE_SAMESITE: ${APP_COOKIE_SAMESITE:-strict}
+      APP_LOGIN_RATE_LIMIT_ATTEMPTS: ${APP_LOGIN_RATE_LIMIT_ATTEMPTS:-5}
+      APP_LOGIN_RATE_LIMIT_WINDOW_SECONDS: ${APP_LOGIN_RATE_LIMIT_WINDOW_SECONDS:-300}
+      APP_RESTORE_ENABLED: ${APP_RESTORE_ENABLED:-false}
+      APP_PASSWORD_RESET_TTL_SECONDS: ${APP_PASSWORD_RESET_TTL_SECONDS:-1800}
+      APP_PASSWORD_RESET_DELIVERY: ${APP_PASSWORD_RESET_DELIVERY:-smtp}
+      APP_INVITATION_DELIVERY: ${APP_INVITATION_DELIVERY:-smtp}
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      PATRIMONIO_USERNAME: ${PATRIMONIO_USERNAME:-admin}
+      PATRIMONIO_PASSWORD: ${PATRIMONIO_PASSWORD:-change-me}
+      PATRIMONIO_SESSION_SECRET: ${PATRIMONIO_SESSION_SECRET:-change-me-session-secret}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  db_data:

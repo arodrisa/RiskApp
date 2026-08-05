@@ -1,0 +1,12 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+node_modules/
+frontend/dist/
+
+# Local portfolio data and imported source workbooks must not be versioned.
+patrimonio.db
+Patrimonio *.xlsx

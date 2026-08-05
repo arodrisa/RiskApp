@@ -1,0 +1,2369 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patrimonio</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #10131a;
+        --panel: #171b24;
+        --panel-2: #202632;
+        --line: rgba(255, 255, 255, 0.1);
+        --text: #f6f7fb;
+        --muted: #9aa4b2;
+        --accent: #5dd3b3;
+        --accent-2: #7aa7ff;
+        --danger: #ff7a90;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .page {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 22px;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      h1, h2, h3 {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      h2 {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+      }
+
+      h3 {
+        color: var(--muted);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .tab-button {
+        background: transparent;
+        color: var(--muted);
+        border: none;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+        padding: 12px 14px;
+      }
+
+      .tab-button.active {
+        color: var(--text);
+        border-bottom-color: var(--accent);
+      }
+
+      .tab {
+        display: none;
+      }
+
+      .tab.active {
+        display: block;
+      }
+
+      .toolbar, .filters, .form-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: end;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        margin-bottom: 12px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      input, select, button {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 9px 10px;
+        font-size: 0.95rem;
+      }
+
+      input, select {
+        width: 100%;
+        background: var(--panel-2);
+        color: var(--text);
+      }
+
+      button {
+        background: var(--accent);
+        color: #08110e;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: var(--panel-2);
+        color: var(--text);
+      }
+
+      button.danger {
+        background: transparent;
+        color: var(--danger);
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.65;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .metric {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 14px;
+      }
+
+      .metric .value {
+        margin-top: 8px;
+        font-size: 1.45rem;
+        font-weight: 700;
+      }
+
+      .preview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 10px;
+        margin: 10px 0 14px;
+      }
+
+      .preview-item {
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px;
+      }
+
+      .preview-item .label {
+        color: var(--muted);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+      }
+
+      .preview-item .amount {
+        margin-top: 5px;
+        font-weight: 700;
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 16px;
+      }
+
+      .chart-panel {
+        position: relative;
+      }
+
+      .chart-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .chart-header h2 {
+        margin-bottom: 0;
+      }
+
+      .icon-button {
+        display: inline-grid;
+        place-items: center;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+      }
+
+      .icon-button svg {
+        width: 17px;
+        height: 17px;
+      }
+
+      .chart-frame {
+        display: grid;
+        gap: 12px;
+      }
+
+      .pie-chart-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(120px, 170px);
+        gap: 12px;
+        align-items: center;
+      }
+
+      .pie-legend {
+        display: grid;
+        gap: 8px;
+        align-content: start;
+      }
+
+      .legend-item {
+        display: grid;
+        grid-template-columns: 10px minmax(0, 1fr);
+        gap: 8px;
+        align-items: center;
+        color: var(--text);
+        font-size: 0.82rem;
+      }
+
+      .legend-swatch {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+      }
+
+      .chart-settings-list {
+        display: grid;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .chart-setting-row {
+        display: grid;
+        grid-template-columns: minmax(120px, 1fr) 126px;
+        gap: 10px;
+        align-items: center;
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 8px;
+      }
+
+      .chart-setting-row label {
+        display: inline-flex;
+        grid-template-columns: none;
+        align-items: center;
+        gap: 8px;
+        color: var(--text);
+      }
+
+      .chart-setting-row input {
+        width: auto;
+      }
+
+      .catalog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 16px;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th, td {
+        border-bottom: 1px solid var(--line);
+        padding: 8px;
+        text-align: left;
+        vertical-align: middle;
+        white-space: nowrap;
+      }
+
+      th {
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      th.sortable {
+        cursor: pointer;
+        user-select: none;
+      }
+
+      th.sortable::after {
+        content: " ↕";
+        color: rgba(154, 164, 178, 0.55);
+        font-size: 0.75rem;
+      }
+
+      th.sort-asc::after {
+        content: " ↑";
+        color: var(--accent);
+      }
+
+      th.sort-desc::after {
+        content: " ↓";
+        color: var(--accent);
+      }
+
+      td input, td select {
+        min-width: 120px;
+      }
+
+      .owner-cell {
+        display: grid;
+        grid-template-columns: minmax(150px, 1fr) auto;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .split-button {
+        padding: 9px 10px;
+        white-space: nowrap;
+      }
+
+      .split-summary {
+        color: var(--muted);
+        font-size: 0.78rem;
+        grid-column: 1 / -1;
+      }
+
+      .status {
+        min-height: 22px;
+        margin-top: 8px;
+      }
+
+      .status.error {
+        color: var(--danger);
+      }
+
+      .status.success {
+        color: var(--accent);
+      }
+
+      canvas {
+        width: 100%;
+        height: 220px;
+        background: #111722;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: rgba(8, 11, 16, 0.74);
+      }
+
+      .modal {
+        width: min(560px, 100%);
+        max-height: min(720px, calc(100dvh - 48px));
+        overflow: auto;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 18px;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: start;
+        margin-bottom: 14px;
+      }
+
+      .ownership-row {
+        display: grid;
+        grid-template-columns: 1fr 120px;
+        gap: 10px;
+        align-items: center;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .ownership-row:last-child {
+        border-bottom: none;
+      }
+
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="header">
+        <div>
+          <h1>Patrimonio</h1>
+          <p class="muted">Snapshot-based asset control</p>
+        </div>
+        <div class="toolbar">
+          <label>
+            As of date
+            <select id="dateSelect"></select>
+          </label>
+          <button id="exportBtn" type="button" class="secondary">Export backup</button>
+          <button id="refreshBtn" type="button">Refresh</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-button active" data-tab="dataTab" type="button">Data entry</button>
+        <button class="tab-button" data-tab="antonioTab" type="button">Antonio</button>
+        <button class="tab-button" data-tab="patriciaTab" type="button">Patricia</button>
+        <button class="tab-button" data-tab="aggregateTab" type="button">Aggregate</button>
+      </div>
+
+      <section id="dataTab" class="tab active">
+        <div class="panel">
+          <h2>Snapshot data</h2>
+          <div class="toolbar">
+            <label>
+              New date
+              <input id="entryDate" type="date" />
+            </label>
+            <button id="loadSelectedTemplateBtn" type="button" class="secondary">Load selected date</button>
+            <button id="loadPreviousTemplateBtn" type="button" class="secondary">Use previous date as template</button>
+            <button id="addDraftRowBtn" type="button" class="secondary">Add row</button>
+            <button id="applyPricesBtn" type="button" class="secondary">Apply stock prices</button>
+            <button id="saveDraftBtn" type="button">Save all</button>
+          </div>
+          <div id="entryStatus" class="status muted"></div>
+          <div id="draftPreview" class="preview-grid"></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Name</th>
+                  <th>Owner</th>
+                  <th>Quantity</th>
+                  <th>Value</th>
+                  <th>Broker</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="draftRows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="catalog-grid">
+          <div class="panel">
+            <h2>Owners</h2>
+            <form id="ownerForm" class="form-grid">
+              <label>
+                Name
+                <input id="ownerName" type="text" required />
+              </label>
+              <label>
+                Type
+                <select id="ownerType">
+                  <option value="person">Person</option>
+                  <option value="company">Company</option>
+                </select>
+              </label>
+              <button type="submit">Add owner</button>
+            </form>
+            <div id="ownerStatus" class="status muted"></div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Name</th><th>Type</th><th></th><th></th></tr>
+                </thead>
+                <tbody id="ownerCatalogRows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2>Assets</h2>
+            <form id="assetForm" class="form-grid">
+              <label>
+                Name
+                <input id="assetName" type="text" required />
+              </label>
+              <label>
+                Category
+                <input id="assetCategory" type="text" required />
+              </label>
+              <label>
+                Type
+                <select id="assetType">
+                  <option value="">Other</option>
+                  <option value="stock">Stock</option>
+                  <option value="fund">Fund</option>
+                  <option value="bond">Bond</option>
+                  <option value="cash">Cash</option>
+                  <option value="real_estate">Real estate</option>
+                  <option value="company">Company</option>
+                </select>
+              </label>
+              <label>
+                Valuation
+                <select id="assetValuation">
+                  <option value="market_direct">Market direct</option>
+                  <option value="price_provider">Price provider</option>
+                  <option value="market_minus_debt">Market minus debt</option>
+                  <option value="company_net_assets">Company net assets</option>
+                </select>
+              </label>
+              <label>
+                Price provider
+                <select id="assetPriceProvider">
+                  <option value="manual">Manual</option>
+                  <option value="yahoo">Yahoo</option>
+                </select>
+              </label>
+              <label>
+                Ticker / ID
+                <input id="assetPriceSymbol" type="text" placeholder="Example: SAN.MC" />
+              </label>
+              <button type="submit">Add asset</button>
+            </form>
+            <div id="assetStatus" class="status muted"></div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Name</th><th>Category</th><th>Type</th><th>Valuation</th><th>Provider</th><th>Ticker / ID</th><th></th><th></th></tr>
+                </thead>
+                <tbody id="assetCatalogRows"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="antonioTab" class="tab">
+        <div id="antonioContent"></div>
+      </section>
+
+      <section id="patriciaTab" class="tab">
+        <div id="patriciaContent"></div>
+      </section>
+
+      <section id="aggregateTab" class="tab">
+        <div id="aggregateContent"></div>
+      </section>
+    </div>
+
+    <div id="ownershipModal" class="modal-backdrop" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="ownershipTitle">
+        <div class="modal-header">
+          <div>
+            <h2 id="ownershipTitle">Ownership split</h2>
+            <p id="ownershipAssetName" class="muted"></p>
+          </div>
+          <button id="closeOwnershipModalBtn" type="button" class="secondary">Close</button>
+        </div>
+        <div id="ownershipRows"></div>
+        <div id="ownershipStatus" class="status muted"></div>
+        <div class="modal-actions">
+          <button id="saveOwnershipBtn" type="button">Save split</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="chartSettingsModal" class="modal-backdrop" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="chartSettingsTitle">
+        <div class="modal-header">
+          <div>
+            <h2 id="chartSettingsTitle">Chart settings</h2>
+            <p id="chartSettingsSubtitle" class="muted"></p>
+          </div>
+          <button id="closeChartSettingsModalBtn" type="button" class="secondary">Close</button>
+        </div>
+        <div id="chartSettingsBody"></div>
+      </div>
+    </div>
+
+    <script>
+      const INVESTMENT_CATEGORIES = new Set(['RV', 'PP', 'PIAS']);
+      const TOTAL_SERIES_KEY = '__total';
+      const ownerAliases = {
+        Antonio: ['Antonio'],
+        Patricia: ['Patri', 'Patricia'],
+      };
+      const defaultFamilyOwners = ['Antonio', 'Patri', 'Patricia'];
+      const chartPalettes = {
+        calm: ['#5dd3b3', '#7aa7ff', '#f4c95d', '#f28f8f', '#b994ff', '#7bd88f', '#f0a6ca', '#8bd3e6'],
+        vivid: ['#00c2ff', '#ffb000', '#ff5c8a', '#6ee7b7', '#a78bfa', '#f97316', '#22c55e', '#e879f9'],
+        mono: ['#f6f7fb', '#cbd5e1', '#94a3b8', '#64748b', '#475569', '#334155', '#1f2937', '#111827'],
+      };
+      const state = {
+        date: '',
+        dates: [],
+        owners: [],
+        assets: [],
+        summary: null,
+        rows: [],
+        history: [],
+        chartSettings: {},
+        chartDefinitions: {},
+        tableSort: {},
+        draftRows: [],
+        draftDirty: false,
+        ownershipRowIndex: null,
+      };
+
+      function formatCurrency(value) {
+        return new Intl.NumberFormat('es-ES', {
+          style: 'currency',
+          currency: 'EUR',
+          maximumFractionDigits: 2,
+        }).format(value || 0);
+      }
+
+      function formatNumber(value) {
+        return new Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 }).format(value || 0);
+      }
+
+      function formatPercent(value) {
+        return `${formatNumber(value)}%`;
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function ownerMatches(row, displayOwner) {
+        return (ownerAliases[displayOwner] || [displayOwner]).includes(row.owner_name);
+      }
+
+      function rowValue(row) {
+        return Number(row.value || 0);
+      }
+
+      function rowQuantity(row) {
+        return Number(row.quantity || 0);
+      }
+
+      function isInvestment(row) {
+        return INVESTMENT_CATEGORIES.has(row.category);
+      }
+
+      function categoryList(historyRows) {
+        const values = new Set();
+        historyRows.forEach((item) => {
+          item.details.forEach((row) => values.add(row.category || 'Uncategorized'));
+        });
+        return [...values].sort();
+      }
+
+      function categoryValue(rows, category, investingOnly = false) {
+        return rows
+          .filter((row) => (row.category || 'Uncategorized') === category)
+          .filter((row) => !investingOnly || isInvestment(row))
+          .reduce((sum, row) => sum + rowValue(row), 0);
+      }
+
+      function seriesKeysForChart(categories, includeTotal = false) {
+        return includeTotal ? [...categories, TOTAL_SERIES_KEY] : [...categories];
+      }
+
+      function seriesLabel(key) {
+        return key === TOTAL_SERIES_KEY ? 'Total' : key;
+      }
+
+      function settingsForChart(key, categories, includeTotal = false) {
+        const seriesKeys = seriesKeysForChart(categories, includeTotal);
+        if (!state.chartSettings[key]) {
+          state.chartSettings[key] = {
+            palette: 'calm',
+            mode: 'currency',
+            hiddenCategories: [],
+            seriesAxes: { [TOTAL_SERIES_KEY]: 'secondary' },
+          };
+        }
+        const settings = state.chartSettings[key];
+        settings.hiddenCategories = (settings.hiddenCategories || []).filter((category) => seriesKeys.includes(category));
+        settings.seriesAxes = settings.seriesAxes || settings.categoryAxes || {};
+        if (includeTotal && !settings.seriesAxes[TOTAL_SERIES_KEY]) {
+          settings.seriesAxes[TOTAL_SERIES_KEY] = 'secondary';
+        }
+        Object.keys(settings.seriesAxes).forEach((category) => {
+          if (!seriesKeys.includes(category)) delete settings.seriesAxes[category];
+        });
+        return settings;
+      }
+
+      function visibleCategoriesForChart(key, categories, includeTotal = false) {
+        const settings = settingsForChart(key, categories, includeTotal);
+        return categories.filter((category) => !settings.hiddenCategories.includes(category));
+      }
+
+      function isTotalVisibleForChart(key, categories) {
+        const settings = settingsForChart(key, categories, true);
+        return !settings.hiddenCategories.includes(TOTAL_SERIES_KEY);
+      }
+
+      function chartSettingsHtml(key, categories, includeTotal = true, chartType = 'line') {
+        const settings = settingsForChart(key, categories, includeTotal);
+        const seriesKeys = seriesKeysForChart(categories, includeTotal);
+        const isLineChart = chartType === 'line';
+        const paletteOptions = Object.keys(chartPalettes)
+          .map((name) => `<option value="${name}" ${settings.palette === name ? 'selected' : ''}>${name}</option>`)
+          .join('');
+        const modeOptions = [
+          ['currency', 'EUR'],
+          ['percent', '% vs start'],
+          ['index', 'Index 100'],
+        ].map(([value, label]) => `<option value="${value}" ${settings.mode === value ? 'selected' : ''}>${label}</option>`).join('');
+        const toggles = seriesKeys.map((category) => `
+          <div class="chart-setting-row">
+            <label>
+              <input type="checkbox" data-chart-category="${escapeHtml(category)}" ${settings.hiddenCategories.includes(category) ? '' : 'checked'} />
+              ${escapeHtml(seriesLabel(category))}
+            </label>
+            ${isLineChart ? `
+              <select data-chart-axis="${escapeHtml(category)}">
+                <option value="primary" ${(settings.seriesAxes[category] || 'primary') === 'primary' ? 'selected' : ''}>Left axis</option>
+                <option value="secondary" ${settings.seriesAxes[category] === 'secondary' ? 'selected' : ''}>Right axis</option>
+              </select>
+            ` : '<span class="muted">Visible</span>'}
+          </div>
+        `).join('');
+        return `
+          <div class="chart-controls" data-chart-key="${key}">
+            <div class="toolbar">
+              <label>
+                Palette
+                <select data-chart-palette>${paletteOptions}</select>
+              </label>
+              ${isLineChart ? `
+              <label>
+                Line units
+                <select data-chart-mode>${modeOptions}</select>
+              </label>
+              ` : ''}
+            </div>
+            <div class="toolbar">
+              <button type="button" class="secondary" data-chart-show-all>Show all</button>
+              <button type="button" class="secondary" data-chart-hide-all>Hide all</button>
+            </div>
+            <div class="chart-settings-list">${toggles || '<span class="muted">No categories</span>'}</div>
+          </div>
+        `;
+      }
+
+      function categorySeries(historyRows, categories, investingOnly = false, settings = null, includeTotal = false) {
+        const mode = settings?.mode || 'currency';
+        const series = categories.map((category) => ({
+          label: category,
+          axis: settings?.seriesAxes?.[category] || 'primary',
+          mode,
+          values: transformSeriesValues(
+            historyRows.map((item) => categoryValue(item.details, category, investingOnly)),
+            mode,
+          ),
+          rawValues: historyRows.map((item) => categoryValue(item.details, category, investingOnly)),
+        }));
+        if (includeTotal) {
+          const rawValues = historyRows.map((item) => item.details
+            .filter((row) => !investingOnly || isInvestment(row))
+            .reduce((sum, row) => sum + rowValue(row), 0));
+          series.push({
+            label: 'Total',
+            axis: settings?.seriesAxes?.[TOTAL_SERIES_KEY] || 'secondary',
+            mode,
+            values: transformSeriesValues(rawValues, mode),
+            rawValues,
+          });
+        }
+        return series;
+      }
+
+      function transformSeriesValues(values, mode) {
+        if (mode === 'currency') return values;
+        const first = values.find((value) => Number(value || 0) !== 0) || 0;
+        if (!first) return values.map(() => 0);
+        if (mode === 'percent') return values.map((value) => (Number(value || 0) / first - 1) * 100);
+        if (mode === 'index') return values.map((value) => Number(value || 0) / first * 100);
+        return values;
+      }
+
+      function categorySlices(rows, categories, investingOnly = false) {
+        return categories
+          .map((category) => ({
+            label: category,
+            value: categoryValue(rows, category, investingOnly),
+          }))
+          .filter((item) => item.value > 0);
+      }
+
+      function gearIcon() {
+        return `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z"></path>
+            <path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.04.04a2.1 2.1 0 0 1-2.97 2.97l-.04-.04a1.8 1.8 0 0 0-1.98-.36 1.8 1.8 0 0 0-1.1 1.66V21.3a2.1 2.1 0 0 1-4.2 0v-.06a1.8 1.8 0 0 0-1.18-1.66 1.8 1.8 0 0 0-1.98.36l-.04.04a2.1 2.1 0 1 1-2.97-2.97l.04-.04A1.8 1.8 0 0 0 4.6 15a1.8 1.8 0 0 0-1.66-1.1H2.88a2.1 2.1 0 0 1 0-4.2h.06A1.8 1.8 0 0 0 4.6 8.52a1.8 1.8 0 0 0-.36-1.98l-.04-.04A2.1 2.1 0 0 1 7.17 3.53l.04.04a1.8 1.8 0 0 0 1.98.36A1.8 1.8 0 0 0 10.3 2.27V2.2a2.1 2.1 0 0 1 4.2 0v.07a1.8 1.8 0 0 0 1.1 1.66 1.8 1.8 0 0 0 1.98-.36l.04-.04a2.1 2.1 0 0 1 2.97 2.97l-.04.04a1.8 1.8 0 0 0-.36 1.98c.23.7.88 1.18 1.66 1.18h.06a2.1 2.1 0 0 1 0 4.2h-.06A1.8 1.8 0 0 0 19.4 15Z"></path>
+          </svg>
+        `;
+      }
+
+      function lineChartPanelHtml(key, title, canvasId) {
+        return `
+          <div class="panel chart-panel">
+            <div class="chart-header">
+              <h2>${escapeHtml(title)}</h2>
+              <button type="button" class="secondary icon-button" data-open-chart-settings="${key}" aria-label="Chart settings for ${escapeHtml(title)}" title="Chart settings">${gearIcon()}</button>
+            </div>
+            <canvas id="${canvasId}"></canvas>
+          </div>
+        `;
+      }
+
+      function pieChartPanelHtml(key, title, canvasId, legendId) {
+        return `
+          <div class="panel chart-panel">
+            <div class="chart-header">
+              <h2>${escapeHtml(title)}</h2>
+              <button type="button" class="secondary icon-button" data-open-chart-settings="${key}" aria-label="Chart settings for ${escapeHtml(title)}" title="Chart settings">${gearIcon()}</button>
+            </div>
+            <div class="pie-chart-layout">
+              <canvas id="${canvasId}"></canvas>
+              <div id="${legendId}" class="pie-legend"></div>
+            </div>
+          </div>
+        `;
+      }
+
+      function barChartPanelHtml(key, title, canvasId) {
+        return `
+          <div class="panel chart-panel">
+            <div class="chart-header">
+              <h2>${escapeHtml(title)}</h2>
+              <button type="button" class="secondary icon-button" data-open-chart-settings="${key}" aria-label="Chart settings for ${escapeHtml(title)}" title="Chart settings">${gearIcon()}</button>
+            </div>
+            <canvas id="${canvasId}"></canvas>
+          </div>
+        `;
+      }
+
+      function setRows(tableId, rows, renderer, colspan = 5) {
+        const tbody = document.getElementById(tableId);
+        tbody.innerHTML = '';
+        if (!rows || rows.length === 0) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td colspan="${colspan}" class="muted">No data</td>`;
+          tbody.appendChild(tr);
+          return;
+        }
+        rows.forEach((item) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = renderer(item);
+          tbody.appendChild(tr);
+        });
+      }
+
+      function enableSortableTables(root = document) {
+        const tables = root.matches?.('table') ? [root] : [...root.querySelectorAll('table')];
+        tables.forEach((table) => {
+          const tbody = table.tBodies[0];
+          if (!tbody || !tbody.id) return;
+          const sortState = state.tableSort[tbody.id];
+          [...table.tHead?.rows[0]?.cells || []].forEach((th, index) => {
+            const label = th.textContent.trim();
+            if (!label) return;
+            th.classList.add('sortable');
+            th.dataset.sortColumn = String(index);
+            th.title = `Sort by ${label}`;
+            th.classList.toggle('sort-asc', sortState?.column === index && sortState.direction === 'asc');
+            th.classList.toggle('sort-desc', sortState?.column === index && sortState.direction === 'desc');
+          });
+          if (sortState && tbody.id !== 'draftRows') {
+            sortDomTable(tbody, sortState.column, sortState.direction);
+          }
+        });
+      }
+
+      function nextSortState(tableId, column) {
+        const current = state.tableSort[tableId];
+        const direction = current && current.column === column && current.direction === 'asc' ? 'desc' : 'asc';
+        state.tableSort[tableId] = { column, direction };
+        return state.tableSort[tableId];
+      }
+
+      function compareSortableValues(left, right, direction) {
+        const leftValue = normalizeSortValue(left);
+        const rightValue = normalizeSortValue(right);
+        let result;
+        if (typeof leftValue === 'number' && typeof rightValue === 'number') {
+          result = leftValue - rightValue;
+        } else {
+          result = String(leftValue).localeCompare(String(rightValue), 'es', { numeric: true, sensitivity: 'base' });
+        }
+        return direction === 'asc' ? result : -result;
+      }
+
+      function normalizeSortValue(value) {
+        const text = String(value ?? '').trim();
+        const numericText = text
+          .replace(/[€%\s]/g, '')
+          .replace(/\./g, '')
+          .replace(',', '.');
+        if (/^-?\d+(\.\d+)?$/.test(numericText)) {
+          return Number(numericText);
+        }
+        return text.toLowerCase();
+      }
+
+      function cellSortText(cell) {
+        const control = cell.querySelector('input, select');
+        if (!control) return cell.textContent.trim();
+        if (control.tagName === 'SELECT') {
+          return control.selectedOptions[0]?.textContent || control.value || '';
+        }
+        return control.value || '';
+      }
+
+      function sortDomTable(tbody, column, direction) {
+        const rows = [...tbody.rows].filter((row) => !row.cells[0]?.hasAttribute('colspan'));
+        rows.sort((left, right) => compareSortableValues(
+          cellSortText(left.cells[column]),
+          cellSortText(right.cells[column]),
+          direction,
+        ));
+        rows.forEach((row) => tbody.appendChild(row));
+      }
+
+      function sortDraftRows(column, direction) {
+        state.draftRows.sort((left, right) => compareSortableValues(
+          draftSortValue(left, column),
+          draftSortValue(right, column),
+          direction,
+        ));
+        renderDraftRows();
+      }
+
+      function draftSortValue(row, column) {
+        if (column === 0) return row.category || '';
+        if (column === 1) {
+          const asset = state.assets.find((item) => Number(item.id) === Number(row.asset_id));
+          return asset ? asset.name : row.asset_name || '';
+        }
+        if (column === 2) {
+          if (row.owner_id === '' || row.owner_id === null || row.owner_id === undefined) return 'Common / shared';
+          const owner = state.owners.find((item) => Number(item.id) === Number(row.owner_id));
+          return owner ? owner.name : '';
+        }
+        if (column === 3) return row.quantity || 0;
+        if (column === 4) return row.value || 0;
+        if (column === 5) return row.broker || '';
+        return '';
+      }
+
+      function sortTableFromHeader(th) {
+        const table = th.closest('table');
+        const tbody = table?.tBodies[0];
+        if (!tbody || !tbody.id || !th.classList.contains('sortable')) return;
+        const column = Number(th.dataset.sortColumn);
+        if (Number.isNaN(column)) return;
+        const sortState = nextSortState(tbody.id, column);
+        if (tbody.id === 'draftRows') {
+          sortDraftRows(column, sortState.direction);
+        } else {
+          sortDomTable(tbody, column, sortState.direction);
+        }
+        enableSortableTables(table);
+      }
+
+      function renderCatalogTables() {
+        setRows('ownerCatalogRows', state.owners, (owner) => `
+          <td><input data-owner-id="${owner.id}" data-field="name" value="${escapeHtml(owner.name || '')}" /></td>
+          <td>
+            <select data-owner-id="${owner.id}" data-field="type">
+              <option value="person" ${owner.type === 'person' ? 'selected' : ''}>Person</option>
+              <option value="company" ${owner.type === 'company' ? 'selected' : ''}>Company</option>
+            </select>
+          </td>
+          <td><button type="button" class="secondary" data-save-owner="${owner.id}">Save</button></td>
+          <td><button type="button" class="danger" data-delete-owner="${owner.id}">Delete</button></td>
+        `, 4);
+
+        setRows('assetCatalogRows', state.assets, (asset) => `
+          <td><input data-asset-id="${asset.id}" data-field="name" value="${escapeHtml(asset.name || '')}" /></td>
+          <td><input data-asset-id="${asset.id}" data-field="category" value="${escapeHtml(asset.category || '')}" /></td>
+          <td>
+            <select data-asset-id="${asset.id}" data-field="asset_type">
+              ${assetTypeOptionsHtml(asset.asset_type)}
+            </select>
+          </td>
+          <td>
+            <select data-asset-id="${asset.id}" data-field="valuation_method">
+              <option value="market_direct" ${asset.valuation_method === 'market_direct' ? 'selected' : ''}>Market direct</option>
+              <option value="price_provider" ${asset.valuation_method === 'price_provider' ? 'selected' : ''}>Price provider</option>
+              <option value="market_minus_debt" ${asset.valuation_method === 'market_minus_debt' ? 'selected' : ''}>Market minus debt</option>
+              <option value="company_net_assets" ${asset.valuation_method === 'company_net_assets' ? 'selected' : ''}>Company net assets</option>
+            </select>
+          </td>
+          <td>
+            <select data-asset-id="${asset.id}" data-field="price_provider">
+              ${priceProviderOptionsHtml(asset.price_provider)}
+            </select>
+          </td>
+          <td><input data-asset-id="${asset.id}" data-field="price_symbol" value="${escapeHtml(asset.price_symbol || '')}" /></td>
+          <td><button type="button" class="secondary" data-save-asset="${asset.id}">Save</button></td>
+          <td><button type="button" class="danger" data-delete-asset="${asset.id}">Delete</button></td>
+        `, 8);
+        enableSortableTables(document.getElementById('dataTab'));
+      }
+
+      function optionHtml(rows, selectedId, labelKey = 'name') {
+        return rows.map((item) => `<option value="${item.id}" ${Number(selectedId) === Number(item.id) ? 'selected' : ''}>${item[labelKey]}</option>`).join('');
+      }
+
+      function assetTypeOptionsHtml(selectedValue) {
+        const selected = (selectedValue || '').toLowerCase();
+        const options = [
+          ['', 'Other'],
+          ['stock', 'Stock'],
+          ['fund', 'Fund'],
+          ['bond', 'Bond'],
+          ['cash', 'Cash'],
+          ['real_estate', 'Real estate'],
+          ['company', 'Company'],
+        ];
+        return options.map(([value, label]) => `<option value="${value}" ${selected === value ? 'selected' : ''}>${label}</option>`).join('');
+      }
+
+      function priceProviderOptionsHtml(selectedValue) {
+        const value = selectedValue || 'manual';
+        return `
+          <option value="manual" ${value === 'manual' ? 'selected' : ''}>Manual</option>
+          <option value="yahoo" ${value === 'yahoo' ? 'selected' : ''}>Yahoo</option>
+        `;
+      }
+
+      function categoryOptionsHtml(selectedValue) {
+        const categories = [...new Set(state.assets.map((asset) => asset.category).filter(Boolean))].sort();
+        return `<option value="" ${selectedValue ? '' : 'selected'}>Choose category</option>${categories.map((category) => `<option value="${escapeHtml(category)}" ${category === selectedValue ? 'selected' : ''}>${escapeHtml(category)}</option>`).join('')}`;
+      }
+
+      function assetOptionHtml(selectedId, category = '') {
+        const assets = category ? state.assets.filter((asset) => asset.category === category) : state.assets;
+        return `<option value="" ${selectedId ? '' : 'selected'}>Choose asset</option>${assets.map((asset) => `<option value="${asset.id}" ${Number(selectedId) === Number(asset.id) ? 'selected' : ''}>${escapeHtml(asset.name || '')}</option>`).join('')}`;
+      }
+
+      function ownerOptionHtml(selectedId) {
+        const commonSelected = selectedId === null || selectedId === undefined || selectedId === '';
+        return `<option value="" ${commonSelected ? 'selected' : ''}>Common / shared</option>${optionHtml(state.owners, selectedId)}`;
+      }
+
+      function assetByName(name) {
+        return state.assets.find((asset) => asset.name === name);
+      }
+
+      function ownerByName(name) {
+        return state.owners.find((owner) => owner.name === name);
+      }
+
+      function familyOwnerName(owner) {
+        if (!owner) return null;
+        if (owner.name === 'Antonio') return 'Antonio';
+        if (owner.name === 'Patri' || owner.name === 'Patricia') return 'Patri';
+        return null;
+      }
+
+      function defaultFamilyShares() {
+        const antonio = ownerByName('Antonio');
+        const patri = ownerByName('Patri') || ownerByName('Patricia');
+        const shares = [];
+        if (antonio) shares.push({ owner_id: antonio.id, owner_name: antonio.name, share: 0.5 });
+        if (patri) shares.push({ owner_id: patri.id, owner_name: patri.name, share: 0.5 });
+        return shares;
+      }
+
+      function sharesForRow(row) {
+        const shares = row.ownership_shares || [];
+        return shares.length ? shares : defaultFamilyShares();
+      }
+
+      function splitSummary(row) {
+        return sharesForRow(row)
+          .filter((share) => Number(share.share || 0) > 0)
+          .map((share) => {
+            const owner = state.owners.find((item) => Number(item.id) === Number(share.owner_id));
+            const name = owner ? owner.name : share.owner_name || 'Unknown';
+            return `${name} ${formatPercent(Number(share.share || 0) * 100)}`;
+          })
+          .join(' · ');
+      }
+
+      function calculateDraftPreview() {
+        const totals = {
+          gross: 0,
+          antonio: 0,
+          patri: 0,
+          unallocated: 0,
+          ignored: 0,
+        };
+
+        state.draftRows.forEach((row) => {
+          const value = Number(row.value || 0);
+          if (!Number.isFinite(value) || value <= 0) {
+            totals.ignored += 1;
+            return;
+          }
+
+          totals.gross += value;
+          const ownerId = row.owner_id === '' || row.owner_id === null || row.owner_id === undefined ? null : Number(row.owner_id);
+          if (ownerId !== null) {
+            const owner = state.owners.find((item) => Number(item.id) === ownerId);
+            const familyName = familyOwnerName(owner);
+            if (familyName === 'Antonio') totals.antonio += value;
+            else if (familyName === 'Patri') totals.patri += value;
+            else totals.unallocated += value;
+            return;
+          }
+
+          let allocated = 0;
+          sharesForRow(row).forEach((share) => {
+            const shareValue = value * Number(share.share || 0);
+            allocated += shareValue;
+            const owner = state.owners.find((item) => Number(item.id) === Number(share.owner_id));
+            const familyName = familyOwnerName(owner);
+            if (familyName === 'Antonio') totals.antonio += shareValue;
+            else if (familyName === 'Patri') totals.patri += shareValue;
+          });
+          totals.unallocated += Math.max(0, value - allocated);
+        });
+
+        return totals;
+      }
+
+      function renderDraftPreview() {
+        const container = document.getElementById('draftPreview');
+        const totals = calculateDraftPreview();
+        container.innerHTML = `
+          <div class="preview-item"><div class="label">Gross NAV</div><div class="amount">${formatCurrency(totals.gross)}</div></div>
+          <div class="preview-item"><div class="label">Antonio</div><div class="amount">${formatCurrency(totals.antonio)}</div></div>
+          <div class="preview-item"><div class="label">Patri</div><div class="amount">${formatCurrency(totals.patri)}</div></div>
+          <div class="preview-item"><div class="label">Unallocated / third-party</div><div class="amount">${formatCurrency(totals.unallocated)}</div></div>
+          <div class="preview-item"><div class="label">Rows ignored</div><div class="amount">${totals.ignored}</div></div>
+        `;
+      }
+
+      async function fetchJson(url, options) {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({}));
+          throw new Error(error.detail || `Request failed: ${response.status}`);
+        }
+        if (response.status === 204) return null;
+        return response.json();
+      }
+
+      async function loadEntities() {
+        const [owners, assets] = await Promise.all([
+          fetchJson('/owners/'),
+          fetchJson('/assets/'),
+        ]);
+        state.owners = owners;
+        state.assets = assets;
+        renderCatalogTables();
+      }
+
+      async function loadDates() {
+        state.dates = await fetchJson('/dashboard/dates');
+        if (!state.date && state.dates.length) {
+          state.date = state.dates[state.dates.length - 1];
+        }
+        const select = document.getElementById('dateSelect');
+        select.innerHTML = state.dates.map((date) => `<option value="${date}" ${date === state.date ? 'selected' : ''}>${date}</option>`).join('');
+        document.getElementById('entryDate').value = state.date || '';
+      }
+
+      async function loadSnapshot() {
+        const query = state.date ? `?as_of_date=${state.date}` : '';
+        const [summary, rows] = await Promise.all([
+          fetchJson(`/dashboard/summary${query}`),
+          fetchJson(`/dashboard/details${query}`),
+        ]);
+        state.summary = summary;
+        state.rows = rows;
+      }
+
+      async function loadHistory() {
+        state.history = await fetchJson('/dashboard/history');
+      }
+
+      function buildDraftFromRows(rows, targetDate, keepPositionIds = false) {
+        state.draftRows = rows.map((row) => {
+          const asset = assetByName(row.asset_name);
+          const owner = ownerByName(row.owner_name);
+          return {
+            position_id: keepPositionIds ? row.position_id : null,
+            date: targetDate,
+            asset_id: row.asset_id || (asset ? asset.id : ''),
+            asset_name: row.asset_name || '',
+            owner_id: row.owner_id || (owner ? owner.id : ''),
+            category: row.category || '',
+            quantity: row.quantity || 0,
+            value: row.value || 0,
+            broker: row.broker || '',
+            ownership_shares: row.ownership_shares || [],
+          };
+        });
+      }
+
+      function previousDateFor(targetDate) {
+        return [...state.dates].filter((date) => date < targetDate).pop() || state.dates[state.dates.length - 1] || '';
+      }
+
+      async function loadSelectedTemplate() {
+        if (!confirmDiscardDraftChanges()) return;
+        const targetDate = document.getElementById('entryDate').value || state.date;
+        const rows = await fetchJson(`/positions/snapshot?as_of_date=${state.date}`);
+        buildDraftFromRows(rows, targetDate, targetDate === state.date);
+        state.draftDirty = false;
+        renderDraftRows();
+        document.getElementById('entryStatus').textContent = targetDate === state.date ? `Loaded editable rows from ${state.date}` : `Loaded ${state.date} as template for ${targetDate}`;
+      }
+
+      async function loadPreviousTemplate() {
+        if (!confirmDiscardDraftChanges()) return;
+        const targetDate = document.getElementById('entryDate').value;
+        const sourceDate = previousDateFor(targetDate);
+        const rows = sourceDate ? await fetchJson(`/positions/snapshot?as_of_date=${sourceDate}`) : [];
+        buildDraftFromRows(rows, targetDate, false);
+        state.draftDirty = false;
+        renderDraftRows();
+        document.getElementById('entryStatus').textContent = sourceDate ? `Loaded template from ${sourceDate}` : 'No previous date available';
+      }
+
+      function addDraftRow() {
+        const firstAsset = state.assets[0];
+        const firstOwner = state.owners[0];
+        state.draftRows.push({
+          position_id: null,
+          date: document.getElementById('entryDate').value || state.date,
+          asset_id: firstAsset ? firstAsset.id : '',
+          asset_name: firstAsset ? firstAsset.name || '' : '',
+          owner_id: firstOwner ? firstOwner.id : '',
+          category: firstAsset ? firstAsset.category || '' : '',
+          quantity: 1,
+          value: 0,
+          broker: '',
+          ownership_shares: [],
+        });
+        setDraftDirty(true, 'New row added. Save table to apply changes.');
+        renderDraftRows();
+      }
+
+      function renderDraftRows() {
+        const tbody = document.getElementById('draftRows');
+        tbody.innerHTML = '';
+        if (!state.draftRows.length) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = '<td colspan="7" class="muted">Load a template or add a row</td>';
+          tbody.appendChild(tr);
+          renderDraftPreview();
+          return;
+        }
+        state.draftRows.forEach((row, index) => {
+          const tr = document.createElement('tr');
+          const isSharedRow = row.owner_id === '' || row.owner_id === null || row.owner_id === undefined;
+          tr.innerHTML = `
+            <td><select data-field="category" data-index="${index}">${categoryOptionsHtml(row.category || '')}</select></td>
+            <td><select data-field="asset_id" data-index="${index}">${assetOptionHtml(row.asset_id, row.category || '')}</select></td>
+            <td>
+              <div class="owner-cell">
+                <select data-field="owner_id" data-index="${index}">${ownerOptionHtml(row.owner_id)}</select>
+                ${isSharedRow ? `<button type="button" class="secondary split-button" data-split="${index}">Split</button>` : ''}
+                ${isSharedRow ? `<div class="split-summary">${splitSummary(row)}</div>` : ''}
+              </div>
+            </td>
+            <td><input type="number" step="any" data-field="quantity" data-index="${index}" value="${row.quantity || 0}" /></td>
+            <td><input type="number" step="any" data-field="value" data-index="${index}" value="${row.value || 0}" /></td>
+            <td><input data-field="broker" data-index="${index}" value="${row.broker || ''}" /></td>
+            <td><button type="button" class="secondary" data-remove="${index}">Remove</button></td>
+          `;
+          tbody.appendChild(tr);
+        });
+        renderDraftPreview();
+        enableSortableTables(tbody.closest('table'));
+      }
+
+      function syncDraftFromInput(target, allowRowRefresh = true) {
+        const index = Number(target.dataset.index);
+        const field = target.dataset.field;
+        if (!field || Number.isNaN(index)) return;
+        const numericFields = new Set(['asset_id', 'quantity', 'value']);
+        state.draftRows[index][field] = numericFields.has(field) ? Number(target.value) : target.value;
+        setDraftDirty(true);
+        if (field === 'category') {
+          const firstAsset = state.assets.find((asset) => asset.category === target.value);
+          state.draftRows[index].asset_id = firstAsset ? firstAsset.id : '';
+          state.draftRows[index].asset_name = firstAsset ? firstAsset.name || '' : '';
+          renderDraftRows();
+        }
+        if (field === 'asset_id') {
+          const asset = state.assets.find((item) => Number(item.id) === Number(target.value));
+          state.draftRows[index].asset_name = asset ? asset.name || '' : '';
+          if (asset) {
+            state.draftRows[index].category = asset.category || '';
+          }
+          if (allowRowRefresh) renderDraftRows();
+        }
+        if (field === 'owner_id') {
+          renderDraftRows();
+        }
+        renderDraftPreview();
+      }
+
+      function setStatus(element, message, tone = 'muted') {
+        element.className = `status ${tone}`;
+        element.textContent = message;
+      }
+
+      function setDraftDirty(value, message = '') {
+        state.draftDirty = value;
+        if (message) {
+          setStatus(document.getElementById('entryStatus'), message, value ? 'muted' : 'success');
+        }
+      }
+
+      function confirmDiscardDraftChanges() {
+        if (!state.draftDirty) return true;
+        return confirm('You have unsaved changes in the snapshot table. Discard them?');
+      }
+
+      function isDefaultFamilyOwner(owner) {
+        return defaultFamilyOwners.includes(owner.name);
+      }
+
+      function defaultShareForOwner(owner) {
+        if (owner.name === 'Antonio') return 50;
+        if (owner.name === 'Patri' || owner.name === 'Patricia') return 50;
+        return 0;
+      }
+
+      function updateOwnershipPreview() {
+        const status = document.getElementById('ownershipStatus');
+        const inputs = [...document.querySelectorAll('[data-ownership-owner-id]')];
+        const total = inputs.reduce((sum, input) => sum + Number(input.value || 0), 0);
+        if (total > 100) {
+          setStatus(status, `Total is ${formatNumber(total)}%. Reduce it to 100% or less.`, 'error');
+          return false;
+        }
+        const unallocated = 100 - total;
+        const message = unallocated > 0
+          ? `Family allocation ${formatNumber(total)}%. Unallocated or third-party share ${formatNumber(unallocated)}%.`
+          : 'Family allocation 100%.';
+        setStatus(status, message, 'muted');
+        return true;
+      }
+
+      function openOwnershipModal(rowIndex) {
+        const status = document.getElementById('ownershipStatus');
+        const row = state.draftRows[rowIndex];
+        const asset = row ? state.assets.find((item) => Number(item.id) === Number(row.asset_id)) : null;
+        const assetName = asset ? asset.name : (row.asset_name || '').trim();
+        if (!assetName) {
+          setStatus(document.getElementById('entryStatus'), 'Choose or type an asset before editing split', 'error');
+          return;
+        }
+
+        state.ownershipRowIndex = rowIndex;
+        document.getElementById('ownershipAssetName').textContent = `${assetName} - ${row.broker || 'No broker/bank'}`;
+        document.getElementById('ownershipModal').hidden = false;
+        setStatus(status, '', 'muted');
+
+        const savedShares = new Map((row.ownership_shares || []).map((share) => [Number(share.owner_id), Number(share.share || 0) * 100]));
+        const hasSavedShares = (row.ownership_shares || []).length > 0;
+        document.getElementById('ownershipRows').innerHTML = state.owners.map((owner) => {
+          const value = hasSavedShares ? savedShares.get(Number(owner.id)) || 0 : defaultShareForOwner(owner);
+          return `
+            <label class="ownership-row">
+              <span>${owner.name}<span class="muted"> ${owner.type || 'person'}</span></span>
+              <input type="number" min="0" max="100" step="any" data-ownership-owner-id="${owner.id}" value="${value}" />
+            </label>
+          `;
+        }).join('');
+        updateOwnershipPreview();
+      }
+
+      function closeOwnershipModal() {
+        state.ownershipRowIndex = null;
+        document.getElementById('ownershipModal').hidden = true;
+      }
+
+      function openChartSettingsModal(key) {
+        const definition = state.chartDefinitions[key];
+        if (!definition) return;
+        document.getElementById('chartSettingsTitle').textContent = 'Chart settings';
+        document.getElementById('chartSettingsSubtitle').textContent = definition.title;
+        document.getElementById('chartSettingsBody').innerHTML = chartSettingsHtml(key, definition.categories, definition.includeTotal, definition.chartType);
+        document.getElementById('chartSettingsModal').hidden = false;
+      }
+
+      function closeChartSettingsModal() {
+        document.getElementById('chartSettingsModal').hidden = true;
+      }
+
+      function updateChartSettingsFromControl(control) {
+        const controls = control.closest('[data-chart-key]');
+        if (!controls) return;
+        const key = controls.dataset.chartKey;
+        const definition = state.chartDefinitions[key];
+        if (!definition) return;
+        const allCategories = seriesKeysForChart(definition.categories, definition.includeTotal);
+        const settings = settingsForChart(key, definition.categories, definition.includeTotal);
+        if (control.dataset.chartPalette !== undefined) {
+          settings.palette = control.value;
+        }
+        if (control.dataset.chartMode !== undefined) {
+          settings.mode = control.value;
+        }
+        if (control.dataset.chartAxis !== undefined) {
+          settings.seriesAxes[control.dataset.chartAxis] = control.value;
+        }
+        if (control.dataset.chartCategory !== undefined) {
+          settings.hiddenCategories = [...controls.querySelectorAll('[data-chart-category]')]
+            .filter((input) => !input.checked)
+            .map((input) => input.dataset.chartCategory);
+        }
+        settings.hiddenCategories = settings.hiddenCategories.filter((category) => allCategories.includes(category));
+        renderAll();
+        openChartSettingsModal(key);
+      }
+
+      function saveOwnershipSplit() {
+        const status = document.getElementById('ownershipStatus');
+        if (state.ownershipRowIndex === null) return;
+        if (!updateOwnershipPreview()) return;
+
+        const inputs = [...document.querySelectorAll('[data-ownership-owner-id]')];
+        const shares = inputs
+          .map((input) => ({
+            owner_id: Number(input.dataset.ownershipOwnerId),
+            share: Number(input.value || 0) / 100,
+          }))
+          .filter((row) => row.share > 0);
+
+        state.draftRows[state.ownershipRowIndex].ownership_shares = shares;
+        setDraftDirty(true, 'Split updated in draft. Save table to apply changes.');
+        setStatus(status, 'Split staged. Save table to persist it.', 'success');
+        closeOwnershipModal();
+        renderDraftPreview();
+      }
+
+      function validateDraftRows(date) {
+        const errors = [];
+        const warnings = [];
+        const keys = new Map();
+        let zeroValueRows = 0;
+
+        if (!date) {
+          errors.push('Choose a date first');
+        }
+        if (!state.draftRows.length) {
+          errors.push('Add at least one row');
+        }
+
+        state.draftRows.forEach((row, index) => {
+          const rowLabel = `Row ${index + 1}`;
+          const assetId = Number(row.asset_id);
+          const ownerId = row.owner_id === '' || row.owner_id === null || row.owner_id === undefined ? null : Number(row.owner_id);
+          const value = Number(row.value || 0);
+
+          if (!assetId || !state.assets.some((asset) => Number(asset.id) === assetId)) {
+            errors.push(`${rowLabel}: choose an asset`);
+          }
+          if (ownerId !== null && (!ownerId || !state.owners.some((owner) => Number(owner.id) === ownerId))) {
+            errors.push(`${rowLabel}: choose an owner`);
+          }
+          if (!(row.category || '').trim()) {
+            errors.push(`${rowLabel}: Category is required`);
+          }
+          if (!Number.isFinite(value)) {
+            errors.push(`${rowLabel}: NAV must be a number`);
+          } else if (value <= 0) {
+            zeroValueRows += 1;
+          }
+
+          const key = `${date}|${assetId}|${ownerId}|${(row.broker || '').trim().toLowerCase()}`;
+          const duplicateCount = keys.get(key) || 0;
+          keys.set(key, duplicateCount + 1);
+        });
+
+        const duplicateGroups = [...keys.values()].filter((count) => count > 1).length;
+        if (duplicateGroups) {
+          warnings.push(`${duplicateGroups} duplicate group(s) will be merged by asset, owner, date and broker/bank`);
+        }
+        if (zeroValueRows) {
+          warnings.push(`${zeroValueRows} row(s) with NAV <= 0 will be ignored or deleted if already saved`);
+        }
+
+        return { errors, warnings };
+      }
+
+      async function applyStockPrices() {
+        const status = document.getElementById('entryStatus');
+        const button = document.getElementById('applyPricesBtn');
+        const candidateRows = state.draftRows
+          .map((row, index) => ({ row, index, asset: state.assets.find((asset) => Number(asset.id) === Number(row.asset_id)) }))
+          .filter((item) => item.asset && item.asset.valuation_method === 'price_provider' && item.asset.price_provider !== 'manual');
+
+        if (!candidateRows.length) {
+          setStatus(status, 'No configured stock price rows found. Set asset valuation to Price provider and add a ticker/ID first.', 'muted');
+          return;
+        }
+
+        button.disabled = true;
+        setStatus(status, `Fetching prices for ${candidateRows.length} row(s)...`, 'muted');
+        let updated = 0;
+        const errors = [];
+        for (const item of candidateRows) {
+          const quantity = Number(item.row.quantity || 0);
+          if (!Number.isFinite(quantity) || quantity <= 0) {
+            errors.push(`${item.asset.name}: quantity is not positive`);
+            continue;
+          }
+          try {
+            const quote = await fetchJson(`/prices/quote?asset_id=${item.asset.id}`);
+            state.draftRows[item.index].value = Number((quantity * Number(quote.price || 0)).toFixed(2));
+            updated += 1;
+          } catch (error) {
+            errors.push(`${item.asset.name}: ${error.message}`);
+          }
+        }
+        button.disabled = false;
+        if (updated) {
+          setDraftDirty(true);
+          renderDraftRows();
+        }
+        const message = errors.length
+          ? `Updated ${updated} row(s). ${errors.join('. ')}`
+          : `Updated ${updated} row(s) using configured price providers.`;
+        setStatus(status, message, errors.length ? 'error' : 'success');
+      }
+
+      async function saveDraftRows() {
+        const status = document.getElementById('entryStatus');
+        const date = document.getElementById('entryDate').value;
+        const validation = validateDraftRows(date);
+        if (validation.errors.length) {
+          setStatus(status, validation.errors.join('. '), 'error');
+          return;
+        }
+        const saveButton = document.getElementById('saveDraftBtn');
+        saveButton.disabled = true;
+        setStatus(status, validation.warnings.length ? `Saving table. ${validation.warnings.join('. ')}` : 'Saving table...', 'muted');
+        const positions = state.draftRows.map((row) => ({
+          position_id: row.position_id || null,
+          as_of_date: date,
+          asset_id: Number(row.asset_id),
+          asset_name: null,
+          owner_id: row.owner_id === '' || row.owner_id === null || row.owner_id === undefined ? null : Number(row.owner_id),
+          broker: row.broker || null,
+          quantity: Number(row.quantity || 0),
+          value: Number(row.value || 0),
+          category: row.category || null,
+          ownership_shares: row.ownership_shares || [],
+          source: 'manual',
+        }));
+        try {
+          const savedRows = await fetchJson('/positions/bulk', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ as_of_date: date, replace_snapshot: true, positions }),
+          });
+          state.date = date;
+          state.draftDirty = false;
+          setStatus(status, `Table saved. ${savedRows.length} position(s) kept.`, 'success');
+          await refreshAll();
+        } catch (error) {
+          setStatus(status, error.message, 'error');
+        } finally {
+          saveButton.disabled = false;
+        }
+      }
+
+      function removeDraftRow(index) {
+        const row = state.draftRows[index];
+        if (!row) return;
+        state.draftRows.splice(index, 1);
+        renderDraftRows();
+        setDraftDirty(true, 'Row removed from draft. Save table to apply changes.');
+      }
+
+      async function createOwnerFromForm(event) {
+        event.preventDefault();
+        const status = document.getElementById('ownerStatus');
+        status.textContent = 'Saving owner...';
+        try {
+          await fetchJson('/owners/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: document.getElementById('ownerName').value.trim(),
+              type: document.getElementById('ownerType').value,
+            }),
+          });
+          document.getElementById('ownerForm').reset();
+          status.textContent = 'Owner added';
+          await loadEntities();
+          renderDraftRows();
+        } catch (error) {
+          status.textContent = error.message;
+        }
+      }
+
+      async function updateOwnerFromCatalog(ownerId) {
+        const status = document.getElementById('ownerStatus');
+        const fields = [...document.querySelectorAll(`[data-owner-id="${ownerId}"]`)];
+        const payload = {};
+        fields.forEach((field) => {
+          payload[field.dataset.field] = field.value;
+        });
+        status.textContent = 'Saving owner...';
+        try {
+          await fetchJson(`/owners/${ownerId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          status.textContent = 'Owner updated';
+          await refreshAll();
+        } catch (error) {
+          status.textContent = error.message;
+        }
+      }
+
+      async function deleteOwnerFromCatalog(ownerId) {
+        const status = document.getElementById('ownerStatus');
+        const owner = state.owners.find((item) => Number(item.id) === Number(ownerId));
+        if (!confirm(`Delete owner ${owner ? owner.name : ownerId}?`)) return;
+        setStatus(status, 'Deleting owner...', 'muted');
+        try {
+          await fetchJson(`/owners/${ownerId}`, { method: 'DELETE' });
+          setStatus(status, 'Owner deleted', 'success');
+          await refreshAll();
+        } catch (error) {
+          setStatus(status, error.message, 'error');
+        }
+      }
+
+      async function createAssetFromForm(event) {
+        event.preventDefault();
+        const status = document.getElementById('assetStatus');
+        status.textContent = 'Saving asset...';
+        try {
+          await fetchJson('/assets/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: document.getElementById('assetName').value.trim(),
+              category: document.getElementById('assetCategory').value.trim(),
+              asset_type: document.getElementById('assetType').value || null,
+              valuation_method: document.getElementById('assetValuation').value,
+              price_provider: document.getElementById('assetPriceProvider').value,
+              price_symbol: document.getElementById('assetPriceSymbol').value.trim() || null,
+            }),
+          });
+          document.getElementById('assetForm').reset();
+          status.textContent = 'Asset added';
+          await loadEntities();
+          renderDraftRows();
+        } catch (error) {
+          status.textContent = error.message;
+        }
+      }
+
+      async function updateAssetFromCatalog(assetId) {
+        const status = document.getElementById('assetStatus');
+        const fields = [...document.querySelectorAll(`[data-asset-id="${assetId}"]`)];
+        const payload = {};
+        fields.forEach((field) => {
+          payload[field.dataset.field] = field.value || null;
+        });
+        status.textContent = 'Saving asset...';
+        try {
+          await fetchJson(`/assets/${assetId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          status.textContent = 'Asset updated';
+          await refreshAll();
+        } catch (error) {
+          status.textContent = error.message;
+        }
+      }
+
+      async function deleteAssetFromCatalog(assetId) {
+        const status = document.getElementById('assetStatus');
+        const asset = state.assets.find((item) => Number(item.id) === Number(assetId));
+        if (!confirm(`Delete asset ${asset ? asset.name : assetId} and its positions?`)) return;
+        setStatus(status, 'Deleting asset...', 'muted');
+        try {
+          await fetchJson(`/assets/${assetId}`, { method: 'DELETE' });
+          setStatus(status, 'Asset deleted', 'success');
+          await refreshAll();
+        } catch (error) {
+          setStatus(status, error.message, 'error');
+        }
+      }
+
+      function ownerRows(displayOwner, historyItem = null) {
+        const rows = historyItem ? historyItem.details : state.rows;
+        return rows.filter((row) => ownerMatches(row, displayOwner));
+      }
+
+      function ownerMetric(displayOwner, historyItem = null) {
+        const rows = ownerRows(displayOwner, historyItem);
+        return {
+          total: rows.reduce((sum, row) => sum + rowValue(row), 0),
+          investing: rows.filter(isInvestment).reduce((sum, row) => sum + rowValue(row), 0),
+        };
+      }
+
+      function renderOwnerTab(displayOwner, containerId) {
+        const rows = ownerRows(displayOwner);
+        const metric = ownerMetric(displayOwner);
+        const ownerHistory = state.history.map((item) => ({
+          date: item.date,
+          details: ownerRows(displayOwner, item),
+          total: ownerMetric(displayOwner, item).total,
+          investing: ownerMetric(displayOwner, item).investing,
+        }));
+        const categories = categoryList(ownerHistory);
+        const totalChartKey = `${containerId}TotalCategoryLine`;
+        const investChartKey = `${containerId}InvestCategoryLine`;
+        const totalPieKey = `${containerId}TotalCategoryPie`;
+        const investPieKey = `${containerId}InvestCategoryPie`;
+        state.chartDefinitions[totalChartKey] = { title: 'Total assets by category', categories, includeTotal: true, chartType: 'line' };
+        state.chartDefinitions[investChartKey] = { title: 'Investing by category', categories, includeTotal: true, chartType: 'line' };
+        state.chartDefinitions[totalPieKey] = { title: 'Latest NAV by category', categories, includeTotal: false, chartType: 'pie' };
+        state.chartDefinitions[investPieKey] = { title: 'Latest investing NAV by category', categories, includeTotal: false, chartType: 'pie' };
+        const totalChartSettings = settingsForChart(totalChartKey, categories, true);
+        const investChartSettings = settingsForChart(investChartKey, categories, true);
+        const totalPieSettings = settingsForChart(totalPieKey, categories);
+        const investPieSettings = settingsForChart(investPieKey, categories);
+        const totalVisibleCategories = visibleCategoriesForChart(totalChartKey, categories, true);
+        const investVisibleCategories = visibleCategoriesForChart(investChartKey, categories, true);
+        const totalPieCategories = visibleCategoriesForChart(totalPieKey, categories);
+        const investPieCategories = visibleCategoriesForChart(investPieKey, categories);
+        const totalPalette = chartPalettes[totalChartSettings.palette] || chartPalettes.calm;
+        const investPalette = chartPalettes[investChartSettings.palette] || chartPalettes.calm;
+        const totalPiePalette = chartPalettes[totalPieSettings.palette] || chartPalettes.calm;
+        const investPiePalette = chartPalettes[investPieSettings.palette] || chartPalettes.calm;
+        const container = document.getElementById(containerId);
+        container.innerHTML = `
+          <div class="grid">
+            <div class="metric"><h3>Total assets</h3><div class="value">${formatCurrency(metric.total)}</div></div>
+            <div class="metric"><h3>Investing</h3><div class="value">${formatCurrency(metric.investing)}</div></div>
+            <div class="metric"><h3>Positions</h3><div class="value">${rows.length}</div></div>
+          </div>
+          <div class="split">
+            ${lineChartPanelHtml(totalChartKey, 'Total assets by category', `${containerId}TotalCategoryLine`)}
+            ${pieChartPanelHtml(totalPieKey, 'Latest NAV by category', `${containerId}TotalCategoryPie`, `${containerId}TotalCategoryPieLegend`)}
+          </div>
+          <div class="split">
+            ${lineChartPanelHtml(investChartKey, 'Investing by category', `${containerId}InvestCategoryLine`)}
+            ${pieChartPanelHtml(investPieKey, 'Latest investing NAV by category', `${containerId}InvestCategoryPie`, `${containerId}InvestCategoryPieLegend`)}
+          </div>
+          <div class="panel"><h2>Positions as of ${state.date || ''}</h2><div class="table-wrap"><table><thead><tr><th>Asset</th><th>Category</th><th>Quantity</th><th>Value</th><th>Broker</th></tr></thead><tbody id="${containerId}Positions"></tbody></table></div></div>
+          <div class="panel"><h2>History absolute</h2><div class="table-wrap"><table><thead><tr><th>Date</th><th>Total</th>${categories.map((cat) => `<th>${cat}</th>`).join('')}</tr></thead><tbody id="${containerId}HistoryAbs"></tbody></table></div></div>
+          <div class="panel"><h2>History vs start</h2><div class="table-wrap"><table><thead><tr><th>Date</th><th>Total</th>${categories.map((cat) => `<th>${cat}</th>`).join('')}</tr></thead><tbody id="${containerId}HistoryPct"></tbody></table></div></div>
+        `;
+        setRows(`${containerId}Positions`, rows, (row) => `<td>${row.asset_name}</td><td>${row.category || ''}</td><td>${formatNumber(row.quantity)}</td><td>${formatCurrency(row.value)}</td><td>${row.broker || ''}</td>`);
+        renderHistoryTables(ownerHistory, categories, `${containerId}HistoryAbs`, `${containerId}HistoryPct`);
+        drawMultiLineChart(
+          `${containerId}TotalCategoryLine`,
+          categorySeries(ownerHistory, totalVisibleCategories, false, totalChartSettings, isTotalVisibleForChart(totalChartKey, categories)),
+          totalPalette,
+          totalChartSettings.mode,
+          ownerHistory.map((item) => item.date),
+        );
+        drawPieChart(`${containerId}TotalCategoryPie`, categorySlices(rows, totalPieCategories), totalPiePalette, `${containerId}TotalCategoryPieLegend`);
+        drawMultiLineChart(
+          `${containerId}InvestCategoryLine`,
+          categorySeries(ownerHistory, investVisibleCategories, true, investChartSettings, isTotalVisibleForChart(investChartKey, categories)),
+          investPalette,
+          investChartSettings.mode,
+          ownerHistory.map((item) => item.date),
+        );
+        drawPieChart(`${containerId}InvestCategoryPie`, categorySlices(rows, investPieCategories, true), investPiePalette, `${containerId}InvestCategoryPieLegend`);
+      }
+
+      function renderHistoryTables(historyRows, categories, absId, pctId) {
+        const start = historyRows.find((item) => item.total !== 0) || historyRows[0] || { total: 0, details: [] };
+        const startByCategory = {};
+        categories.forEach((cat) => {
+          startByCategory[cat] = start.details.filter((row) => (row.category || 'Uncategorized') === cat).reduce((sum, row) => sum + rowValue(row), 0);
+        });
+        setRows(absId, historyRows, (item) => {
+          const cells = categories.map((cat) => {
+            const value = item.details.filter((row) => (row.category || 'Uncategorized') === cat).reduce((sum, row) => sum + rowValue(row), 0);
+            return `<td>${formatCurrency(value)}</td>`;
+          }).join('');
+          return `<td>${item.date}</td><td>${formatCurrency(item.total)}</td>${cells}`;
+        }, categories.length + 2);
+        setRows(pctId, historyRows, (item) => {
+          const totalPct = start.total ? (item.total / start.total - 1) * 100 : 0;
+          const cells = categories.map((cat) => {
+            const value = item.details.filter((row) => (row.category || 'Uncategorized') === cat).reduce((sum, row) => sum + rowValue(row), 0);
+            const base = startByCategory[cat] || 0;
+            return `<td>${base ? formatPercent((value / base - 1) * 100) : '0%'}</td>`;
+          }).join('');
+          return `<td>${item.date}</td><td>${formatPercent(totalPct)}</td>${cells}`;
+        }, categories.length + 2);
+      }
+
+      function groupedAggregateRows() {
+        const total = state.rows.reduce((sum, row) => sum + rowValue(row), 0);
+        const map = new Map();
+        state.rows.forEach((row) => {
+          const key = `${row.asset_name}|${row.category || ''}|${row.broker || ''}`;
+          if (!map.has(key)) {
+            map.set(key, { asset: row.asset_name, category: row.category || '', broker: row.broker || '', quantity: 0, value: 0 });
+          }
+          const item = map.get(key);
+          item.quantity += rowQuantity(row);
+          item.value += rowValue(row);
+        });
+        return [...map.values()].sort((a, b) => b.value - a.value).map((item) => ({
+          ...item,
+          valuePct: total ? item.value / total * 100 : 0,
+        }));
+      }
+
+      function renderAggregateTab() {
+        const container = document.getElementById('aggregateContent');
+        const rows = groupedAggregateRows();
+        const investing = state.rows.filter(isInvestment).reduce((sum, row) => sum + rowValue(row), 0);
+        const categories = categoryList(state.history);
+        const historyRows = state.history.map((item) => ({
+          date: item.date,
+          details: item.details,
+          total: item.details.reduce((sum, row) => sum + rowValue(row), 0),
+          investing: item.details.filter(isInvestment).reduce((sum, row) => sum + rowValue(row), 0),
+        }));
+        const totalChartKey = 'aggregateTotalCategoryLine';
+        const investChartKey = 'aggregateInvestCategoryLine';
+        const totalPieKey = 'aggregateTotalCategoryPie';
+        const investPieKey = 'aggregateInvestCategoryPie';
+        const categoryBarKey = 'aggregateCategoryChart';
+        const brokerBarKey = 'aggregateBrokerChart';
+        const categoryBarRows = state.summary ? state.summary.by_category : [];
+        const brokerBarRows = state.summary ? state.summary.by_broker : [];
+        const categoryBarLabels = categoryBarRows.map((item) => item.category);
+        const brokerBarLabels = brokerBarRows.map((item) => item.broker);
+        state.chartDefinitions[totalChartKey] = { title: 'Total assets by category', categories, includeTotal: true, chartType: 'line' };
+        state.chartDefinitions[investChartKey] = { title: 'Investing by category', categories, includeTotal: true, chartType: 'line' };
+        state.chartDefinitions[totalPieKey] = { title: 'Latest NAV by category', categories, includeTotal: false, chartType: 'pie' };
+        state.chartDefinitions[investPieKey] = { title: 'Latest investing NAV by category', categories, includeTotal: false, chartType: 'pie' };
+        state.chartDefinitions[categoryBarKey] = { title: 'By category', categories: categoryBarLabels, includeTotal: false, chartType: 'bar' };
+        state.chartDefinitions[brokerBarKey] = { title: 'By broker/bank', categories: brokerBarLabels, includeTotal: false, chartType: 'bar' };
+        const totalChartSettings = settingsForChart(totalChartKey, categories, true);
+        const investChartSettings = settingsForChart(investChartKey, categories, true);
+        const totalPieSettings = settingsForChart(totalPieKey, categories);
+        const investPieSettings = settingsForChart(investPieKey, categories);
+        const categoryBarSettings = settingsForChart(categoryBarKey, categoryBarLabels);
+        const brokerBarSettings = settingsForChart(brokerBarKey, brokerBarLabels);
+        const totalVisibleCategories = visibleCategoriesForChart(totalChartKey, categories, true);
+        const investVisibleCategories = visibleCategoriesForChart(investChartKey, categories, true);
+        const totalPieCategories = visibleCategoriesForChart(totalPieKey, categories);
+        const investPieCategories = visibleCategoriesForChart(investPieKey, categories);
+        const categoryBarVisible = visibleCategoriesForChart(categoryBarKey, categoryBarLabels);
+        const brokerBarVisible = visibleCategoriesForChart(brokerBarKey, brokerBarLabels);
+        const totalPalette = chartPalettes[totalChartSettings.palette] || chartPalettes.calm;
+        const investPalette = chartPalettes[investChartSettings.palette] || chartPalettes.calm;
+        const totalPiePalette = chartPalettes[totalPieSettings.palette] || chartPalettes.calm;
+        const investPiePalette = chartPalettes[investPieSettings.palette] || chartPalettes.calm;
+        const categoryBarPalette = chartPalettes[categoryBarSettings.palette] || chartPalettes.calm;
+        const brokerBarPalette = chartPalettes[brokerBarSettings.palette] || chartPalettes.calm;
+        container.innerHTML = `
+          <div class="grid">
+            <div class="metric"><h3>Total assets</h3><div class="value">${formatCurrency(state.summary ? state.summary.total_value : 0)}</div></div>
+            <div class="metric"><h3>Investing</h3><div class="value">${formatCurrency(investing)}</div></div>
+            <div class="metric"><h3>Positions</h3><div class="value">${state.rows.length}</div></div>
+            <div class="metric"><h3>Owners</h3><div class="value">${state.owners.length}</div></div>
+          </div>
+          <div class="split">
+            ${lineChartPanelHtml(totalChartKey, 'Total assets by category', 'aggregateTotalCategoryLine')}
+            ${pieChartPanelHtml(totalPieKey, 'Latest NAV by category', 'aggregateTotalCategoryPie', 'aggregateTotalCategoryPieLegend')}
+          </div>
+          <div class="split">
+            ${lineChartPanelHtml(investChartKey, 'Investing by category', 'aggregateInvestCategoryLine')}
+            ${pieChartPanelHtml(investPieKey, 'Latest investing NAV by category', 'aggregateInvestCategoryPie', 'aggregateInvestCategoryPieLegend')}
+          </div>
+          <div class="split">
+            ${barChartPanelHtml(categoryBarKey, 'By category', 'aggregateCategoryChart')}
+            ${barChartPanelHtml(brokerBarKey, 'By broker/bank', 'aggregateBrokerChart')}
+          </div>
+          <div class="panel"><h2>Aggregated positions</h2><div class="table-wrap"><table><thead><tr><th>Asset</th><th>Category</th><th>Broker</th><th>Quantity</th><th>Value</th><th>Value %</th></tr></thead><tbody id="aggregateRows"></tbody></table></div></div>
+          <div class="panel"><h2>History absolute</h2><div class="table-wrap"><table><thead><tr><th>Date</th><th>Total</th>${categories.map((cat) => `<th>${cat}</th>`).join('')}</tr></thead><tbody id="aggregateHistoryAbs"></tbody></table></div></div>
+          <div class="panel"><h2>History vs start</h2><div class="table-wrap"><table><thead><tr><th>Date</th><th>Total</th>${categories.map((cat) => `<th>${cat}</th>`).join('')}</tr></thead><tbody id="aggregateHistoryPct"></tbody></table></div></div>
+        `;
+        setRows('aggregateRows', rows, (row) => `<td>${row.asset}</td><td>${row.category}</td><td>${row.broker}</td><td>${formatNumber(row.quantity)}</td><td>${formatCurrency(row.value)}</td><td>${formatPercent(row.valuePct)}</td>`, 6);
+        renderHistoryTables(historyRows, categories, 'aggregateHistoryAbs', 'aggregateHistoryPct');
+        drawMultiLineChart(
+          'aggregateTotalCategoryLine',
+          categorySeries(historyRows, totalVisibleCategories, false, totalChartSettings, isTotalVisibleForChart(totalChartKey, categories)),
+          totalPalette,
+          totalChartSettings.mode,
+          historyRows.map((item) => item.date),
+        );
+        drawPieChart('aggregateTotalCategoryPie', categorySlices(state.rows, totalPieCategories), totalPiePalette, 'aggregateTotalCategoryPieLegend');
+        drawMultiLineChart(
+          'aggregateInvestCategoryLine',
+          categorySeries(historyRows, investVisibleCategories, true, investChartSettings, isTotalVisibleForChart(investChartKey, categories)),
+          investPalette,
+          investChartSettings.mode,
+          historyRows.map((item) => item.date),
+        );
+        drawPieChart('aggregateInvestCategoryPie', categorySlices(state.rows, investPieCategories, true), investPiePalette, 'aggregateInvestCategoryPieLegend');
+        drawBarChart('aggregateCategoryChart', categoryBarRows.filter((row) => categoryBarVisible.includes(row.category)), 'category', categoryBarPalette);
+        drawBarChart('aggregateBrokerChart', brokerBarRows.filter((row) => brokerBarVisible.includes(row.broker)), 'broker', brokerBarPalette);
+      }
+
+      function varColor(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      }
+
+      function drawMultiLineChart(canvasId, series, palette, mode = 'currency', dateLabels = []) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * devicePixelRatio;
+        canvas.height = rect.height * devicePixelRatio;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+        ctx.clearRect(0, 0, rect.width, rect.height);
+
+        const activeSeries = series.filter((item) => item.rawValues.some((value) => Number(value || 0) > 0));
+        if (!activeSeries.length) {
+          drawEmptyChart(ctx, rect, 'No category data');
+          return;
+        }
+
+        const padding = { top: 24, right: 76, bottom: 38, left: 76 };
+        const primarySeries = activeSeries.filter((item) => item.axis !== 'secondary');
+        const secondarySeries = activeSeries.filter((item) => item.axis === 'secondary');
+        const primaryScale = axisScale(primarySeries);
+        const secondaryScale = axisScale(secondarySeries);
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, padding.top);
+        ctx.lineTo(padding.left, rect.height - padding.bottom);
+        ctx.moveTo(padding.left, rect.height - padding.bottom);
+        ctx.lineTo(rect.width - padding.right, rect.height - padding.bottom);
+        if (secondarySeries.length) {
+          ctx.moveTo(rect.width - padding.right, padding.top);
+          ctx.lineTo(rect.width - padding.right, rect.height - padding.bottom);
+        }
+        ctx.stroke();
+        drawAxisTicks(ctx, rect, padding, mode, primaryScale, 'left');
+        if (secondarySeries.length) {
+          drawAxisTicks(ctx, rect, padding, mode, secondaryScale, 'right');
+        }
+        drawDateLabels(ctx, rect, padding, dateLabels);
+
+        activeSeries.forEach((item, seriesIndex) => {
+          const scale = item.axis === 'secondary' ? secondaryScale : primaryScale;
+          ctx.strokeStyle = palette[seriesIndex % palette.length];
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          item.values.forEach((value, index) => {
+            const x = padding.left + (rect.width - padding.left - padding.right) * (item.values.length <= 1 ? 0 : index / (item.values.length - 1));
+            const y = rect.height - padding.bottom - ((Number(value || 0) - scale.min) / scale.range) * (rect.height - padding.top - padding.bottom);
+            if (index === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          });
+          ctx.stroke();
+          const lastIndex = item.values.length - 1;
+          const lastValue = Number(item.values[lastIndex] || 0);
+          const labelX = padding.left + (rect.width - padding.left - padding.right) * (item.values.length <= 1 ? 0 : lastIndex / (item.values.length - 1));
+          const labelY = rect.height - padding.bottom - ((lastValue - scale.min) / scale.range) * (rect.height - padding.top - padding.bottom);
+          ctx.fillStyle = palette[seriesIndex % palette.length];
+          ctx.font = item.label === 'Total' ? '700 11px Segoe UI' : '11px Segoe UI';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(item.label, labelX + 6, labelY);
+        });
+      }
+
+      function axisScale(series) {
+        if (!series.length) return { min: 0, max: 1, range: 1 };
+        const values = series.flatMap((item) => item.values.map((value) => Number(value || 0)));
+        const min = Math.min(...values, 0);
+        const max = Math.max(...values, 1);
+        return { min, max, range: max - min || 1 };
+      }
+
+      function formatChartValue(value, mode) {
+        if (mode === 'currency') return formatCurrency(value);
+        if (mode === 'percent') return formatPercent(value);
+        if (mode === 'index') return `${formatNumber(value)} idx`;
+        return formatNumber(value);
+      }
+
+      function axisUnitLabel(mode) {
+        if (mode === 'currency') return 'EUR';
+        if (mode === 'percent') return '% vs start';
+        if (mode === 'index') return 'Index 100';
+        return '';
+      }
+
+      function drawAxisTicks(ctx, rect, padding, mode, scale, side) {
+        const x = side === 'left' ? padding.left : rect.width - padding.right;
+        const textX = side === 'left' ? x - 8 : x + 8;
+        ctx.fillStyle = '#9aa4b2';
+        ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+        ctx.font = '10px Segoe UI';
+        ctx.textAlign = side === 'left' ? 'right' : 'left';
+        ctx.textBaseline = 'middle';
+        for (let index = 0; index <= 4; index += 1) {
+          const ratio = index / 4;
+          const value = scale.max - scale.range * ratio;
+          const y = padding.top + (rect.height - padding.top - padding.bottom) * ratio;
+          ctx.beginPath();
+          ctx.moveTo(side === 'left' ? x - 4 : x, y);
+          ctx.lineTo(side === 'left' ? rect.width - padding.right : x + 4, y);
+          ctx.stroke();
+          ctx.fillText(formatChartValue(value, mode), textX, y);
+        }
+        ctx.fillStyle = '#9aa4b2';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText(side === 'left' ? `Left ${axisUnitLabel(mode)}` : `Right ${axisUnitLabel(mode)}`, textX, 14);
+        ctx.textAlign = 'left';
+      }
+
+      function drawDateLabels(ctx, rect, padding, dateLabels) {
+        if (!dateLabels.length) return;
+        ctx.fillStyle = '#9aa4b2';
+        ctx.font = '10px Segoe UI';
+        ctx.textBaseline = 'alphabetic';
+        ctx.textAlign = 'left';
+        ctx.fillText(dateLabels[0], padding.left, rect.height - 12);
+        if (dateLabels.length > 1) {
+          const last = dateLabels[dateLabels.length - 1];
+          const width = ctx.measureText(last).width;
+          ctx.fillText(last, rect.width - padding.right - width, rect.height - 12);
+        }
+      }
+
+      function drawPieChart(canvasId, slices, palette, legendId = null) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const legend = legendId ? document.getElementById(legendId) : null;
+        if (legend) legend.innerHTML = '';
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * devicePixelRatio;
+        canvas.height = rect.height * devicePixelRatio;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+        ctx.clearRect(0, 0, rect.width, rect.height);
+
+        const total = slices.reduce((sum, item) => sum + item.value, 0);
+        if (!total) {
+          drawEmptyChart(ctx, rect, 'No latest NAV');
+          if (legend) legend.innerHTML = '<span class="muted">No categories</span>';
+          return;
+        }
+
+        const radius = Math.max(42, Math.min(rect.width * 0.31, rect.height * 0.36));
+        const centerX = rect.width * 0.5;
+        const centerY = rect.height * 0.52;
+        let startAngle = -Math.PI / 2;
+        slices.forEach((slice, index) => {
+          const angle = (slice.value / total) * Math.PI * 2;
+          ctx.beginPath();
+          ctx.moveTo(centerX, centerY);
+          ctx.arc(centerX, centerY, radius, startAngle, startAngle + angle);
+          ctx.closePath();
+          ctx.fillStyle = palette[index % palette.length];
+          ctx.fill();
+          if (angle > 0.38) {
+            const midAngle = startAngle + angle / 2;
+            const valueX = centerX + Math.cos(midAngle) * radius * 0.62;
+            const valueY = centerY + Math.sin(midAngle) * radius * 0.62;
+            ctx.fillStyle = '#08110e';
+            ctx.font = '700 10px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(formatPercent(slice.value / total * 100), valueX, valueY - 6);
+            ctx.font = '700 9px Segoe UI';
+            ctx.fillText(formatCurrency(slice.value), valueX, valueY + 7);
+          }
+          startAngle += angle;
+        });
+
+        ctx.fillStyle = '#f6f7fb';
+        ctx.font = '700 11px Segoe UI';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(formatCurrency(total), centerX, centerY);
+
+        if (legend) {
+          legend.innerHTML = slices.slice(0, 8).map((slice, index) => `
+            <div class="legend-item">
+              <span class="legend-swatch" style="background:${palette[index % palette.length]}"></span>
+              <span>${escapeHtml(slice.label)}</span>
+            </div>
+          `).join('');
+        }
+      }
+
+      function drawEmptyChart(ctx, rect, message) {
+        ctx.fillStyle = '#9aa4b2';
+        ctx.font = '12px Segoe UI';
+        ctx.fillText(message, 18, 28);
+      }
+
+      function drawLegend(ctx, items, rect, startX = 18) {
+        const maxItems = items.slice(0, 8);
+        let x = startX;
+        let y = 18;
+        ctx.font = '12px Segoe UI';
+        maxItems.forEach((item) => {
+          const label = item.label.length > 36 ? `${item.label.slice(0, 35)}...` : item.label;
+          const width = ctx.measureText(label).width + 24;
+          if (x + width > rect.width - 12) {
+            x = startX;
+            y += 18;
+          }
+          ctx.fillStyle = item.color;
+          ctx.fillRect(x, y - 9, 9, 9);
+          ctx.fillStyle = '#cbd5e1';
+          ctx.fillText(label, x + 14, y);
+          x += width + 10;
+        });
+      }
+
+      function drawBarChart(canvasId, rows, labelKey, palette = chartPalettes.calm) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * devicePixelRatio;
+        canvas.height = rect.height * devicePixelRatio;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+        ctx.clearRect(0, 0, rect.width, rect.height);
+        const topRows = rows.slice(0, 8);
+        const max = Math.max(...topRows.map((row) => row.value), 1);
+        const barHeight = Math.max(14, (rect.height - 32) / Math.max(topRows.length, 1) - 8);
+        topRows.forEach((row, index) => {
+          const y = 28 + index * (barHeight + 8);
+          const width = (rect.width - 140) * (row.value / max);
+          ctx.fillStyle = palette[index % palette.length];
+          ctx.fillRect(120, y, width, barHeight);
+          ctx.fillStyle = '#f6f7fb';
+          ctx.font = '12px Segoe UI';
+          ctx.fillText(row[labelKey], 8, y + barHeight - 3);
+        });
+      }
+
+      function renderAll() {
+        state.chartDefinitions = {};
+        renderDraftRows();
+        renderOwnerTab('Antonio', 'antonioContent');
+        renderOwnerTab('Patricia', 'patriciaContent');
+        renderAggregateTab();
+        enableSortableTables();
+      }
+
+      async function refreshAll() {
+        await loadEntities();
+        await loadDates();
+        await loadSnapshot();
+        await loadHistory();
+        renderAll();
+      }
+
+      document.querySelectorAll('.tab-button').forEach((button) => {
+        button.addEventListener('click', () => {
+          document.querySelectorAll('.tab-button').forEach((item) => item.classList.remove('active'));
+          document.querySelectorAll('.tab').forEach((item) => item.classList.remove('active'));
+          button.classList.add('active');
+          document.getElementById(button.dataset.tab).classList.add('active');
+          setTimeout(renderAll, 0);
+        });
+      });
+
+      document.body.addEventListener('change', (event) => {
+        if (!event.target.closest('[data-chart-key]')) return;
+        updateChartSettingsFromControl(event.target);
+      });
+
+      document.body.addEventListener('click', (event) => {
+        if (event.target.closest('[data-open-chart-settings]')) {
+          openChartSettingsModal(event.target.closest('[data-open-chart-settings]').dataset.openChartSettings);
+          return;
+        }
+        if (event.target.closest('[data-chart-show-all]')) {
+          const controls = event.target.closest('[data-chart-key]');
+          const key = controls.dataset.chartKey;
+          const definition = state.chartDefinitions[key];
+          const settings = settingsForChart(key, definition.categories, definition.includeTotal);
+          settings.hiddenCategories = [];
+          renderAll();
+          openChartSettingsModal(key);
+          return;
+        }
+        if (event.target.closest('[data-chart-hide-all]')) {
+          const controls = event.target.closest('[data-chart-key]');
+          const key = controls.dataset.chartKey;
+          const definition = state.chartDefinitions[key];
+          const settings = settingsForChart(key, definition.categories, definition.includeTotal);
+          settings.hiddenCategories = seriesKeysForChart(definition.categories, definition.includeTotal);
+          renderAll();
+          openChartSettingsModal(key);
+          return;
+        }
+        const th = event.target.closest('th.sortable');
+        if (!th) return;
+        sortTableFromHeader(th);
+      });
+
+      document.getElementById('refreshBtn').addEventListener('click', async () => {
+        if (!confirmDiscardDraftChanges()) return;
+        state.date = document.getElementById('dateSelect').value;
+        state.draftDirty = false;
+        await refreshAll();
+      });
+
+      document.getElementById('exportBtn').addEventListener('click', () => {
+        if (!confirmDiscardDraftChanges()) return;
+        window.location.href = '/export';
+      });
+
+      document.getElementById('dateSelect').addEventListener('change', async () => {
+        if (!confirmDiscardDraftChanges()) {
+          document.getElementById('dateSelect').value = state.date;
+          return;
+        }
+        state.date = document.getElementById('dateSelect').value;
+        state.draftDirty = false;
+        await refreshAll();
+      });
+
+      document.getElementById('loadSelectedTemplateBtn').addEventListener('click', loadSelectedTemplate);
+      document.getElementById('loadPreviousTemplateBtn').addEventListener('click', loadPreviousTemplate);
+      document.getElementById('addDraftRowBtn').addEventListener('click', addDraftRow);
+      document.getElementById('applyPricesBtn').addEventListener('click', applyStockPrices);
+      document.getElementById('saveDraftBtn').addEventListener('click', saveDraftRows);
+      document.getElementById('ownerForm').addEventListener('submit', createOwnerFromForm);
+      document.getElementById('assetForm').addEventListener('submit', createAssetFromForm);
+      document.getElementById('assetType').addEventListener('change', (event) => {
+        if (event.target.value !== 'stock') return;
+        document.getElementById('assetValuation').value = 'price_provider';
+        if (document.getElementById('assetPriceProvider').value === 'manual') {
+          document.getElementById('assetPriceProvider').value = 'yahoo';
+        }
+      });
+      document.getElementById('ownerCatalogRows').addEventListener('click', (event) => {
+        if (event.target.dataset.saveOwner !== undefined) {
+          updateOwnerFromCatalog(Number(event.target.dataset.saveOwner));
+        }
+        if (event.target.dataset.deleteOwner !== undefined) {
+          deleteOwnerFromCatalog(Number(event.target.dataset.deleteOwner));
+        }
+      });
+      document.getElementById('assetCatalogRows').addEventListener('click', (event) => {
+        if (event.target.dataset.saveAsset !== undefined) {
+          updateAssetFromCatalog(Number(event.target.dataset.saveAsset));
+        }
+        if (event.target.dataset.deleteAsset !== undefined) {
+          deleteAssetFromCatalog(Number(event.target.dataset.deleteAsset));
+        }
+      });
+      document.getElementById('draftRows').addEventListener('input', (event) => syncDraftFromInput(event.target, false));
+      document.getElementById('draftRows').addEventListener('change', (event) => syncDraftFromInput(event.target, true));
+      document.getElementById('draftRows').addEventListener('click', (event) => {
+        if (event.target.dataset.split !== undefined) {
+          openOwnershipModal(Number(event.target.dataset.split));
+        }
+        if (event.target.dataset.remove !== undefined) {
+          removeDraftRow(Number(event.target.dataset.remove));
+        }
+      });
+      document.getElementById('ownershipRows').addEventListener('input', updateOwnershipPreview);
+      document.getElementById('saveOwnershipBtn').addEventListener('click', saveOwnershipSplit);
+      document.getElementById('closeOwnershipModalBtn').addEventListener('click', closeOwnershipModal);
+      document.getElementById('closeChartSettingsModalBtn').addEventListener('click', closeChartSettingsModal);
+      document.getElementById('ownershipModal').addEventListener('click', (event) => {
+        if (event.target.id === 'ownershipModal') {
+          closeOwnershipModal();
+        }
+      });
+      document.getElementById('chartSettingsModal').addEventListener('click', (event) => {
+        if (event.target.id === 'chartSettingsModal') {
+          closeChartSettingsModal();
+        }
+      });
+      window.addEventListener('beforeunload', (event) => {
+        if (!state.draftDirty) return;
+        event.preventDefault();
+        event.returnValue = '';
+      });
+
+      refreshAll();
+    </script>
+  </body>
+</html>
